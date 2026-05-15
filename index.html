@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>ANGEL ANSWERS ORACLE — ULTIMATE DIVINE SYSTEM</title>
+
+<title>ANGEL ANSWERS — DEEP PSYCHO ORACLE</title>
 
 <style>
 
@@ -16,28 +17,24 @@ box-sizing:border-box;
 
 :root{
 --bg:#020617;
---panel:rgba(15,23,42,.78);
+--panel:rgba(15,23,42,.82);
 --line:rgba(255,255,255,.08);
 --gold:#facc15;
+--violet:#8b5cf6;
 --pink:#ec4899;
 --blue:#60a5fa;
---green:#22c55e;
 --red:#ef4444;
---violet:#8b5cf6;
 --white:#f8fafc;
-}
-
-html,body{
-min-height:100%;
 }
 
 body{
 font-family:"Segoe UI",sans-serif;
 background:
-radial-gradient(circle at top,#4338ca 0%,#0f172a 38%,#020617 100%);
+radial-gradient(circle at top,#312e81 0%,#0f172a 35%,#020617 100%);
 color:white;
+min-height:100vh;
 overflow-x:hidden;
-position:relative;
+padding:30px;
 }
 
 body::before{
@@ -52,71 +49,52 @@ background-size:42px 42px;
 animation:stars 120s linear infinite;
 }
 
-body::after{
-content:"";
-position:fixed;
-inset:-40%;
-pointer-events:none;
-background:
-radial-gradient(circle,rgba(139,92,246,.18),transparent 60%),
-radial-gradient(circle,rgba(96,165,250,.14),transparent 65%),
-radial-gradient(circle,rgba(236,72,153,.12),transparent 70%);
-filter:blur(100px);
-animation:aurora 24s ease infinite alternate;
-}
-
-@keyframes aurora{
-0%{transform:translate(-5%,-5%) rotate(0deg);}
-100%{transform:translate(5%,5%) rotate(12deg);}
-}
-
 @keyframes stars{
 from{transform:translateY(0);}
 to{transform:translateY(140px);}
 }
 
 .container{
-max-width:1700px;
+max-width:1500px;
 margin:auto;
-padding:24px;
 position:relative;
 z-index:2;
 }
 
 .title{
 text-align:center;
-font-size:56px;
+font-size:54px;
 font-weight:900;
 letter-spacing:3px;
 margin-top:10px;
-text-shadow:0 0 30px rgba(255,255,255,.45);
+text-shadow:0 0 25px rgba(255,255,255,.35);
 }
 
 .subtitle{
 text-align:center;
-margin-top:12px;
+margin-top:10px;
 color:#cbd5e1;
 letter-spacing:4px;
 font-size:14px;
-margin-bottom:36px;
+margin-bottom:40px;
 }
 
 .panel{
 background:var(--panel);
 border:1px solid var(--line);
-backdrop-filter:blur(18px);
 border-radius:30px;
-padding:28px;
+padding:30px;
 margin-bottom:28px;
+backdrop-filter:blur(18px);
 box-shadow:
-0 0 40px rgba(0,0,0,.45),
-inset 0 0 40px rgba(255,255,255,.02);
+0 0 35px rgba(0,0,0,.4),
+inset 0 0 30px rgba(255,255,255,.03);
 }
 
 .grid{
 display:grid;
 grid-template-columns:1fr 1fr;
-gap:20px;
+gap:24px;
 }
 
 label{
@@ -125,7 +103,7 @@ margin-top:18px;
 margin-bottom:10px;
 font-size:13px;
 letter-spacing:2px;
-color:#e2e8f0;
+color:#cbd5e1;
 }
 
 textarea,
@@ -146,7 +124,7 @@ color:white;
 
 textarea{
 resize:none;
-min-height:120px;
+min-height:140px;
 }
 
 button{
@@ -158,95 +136,39 @@ transition:.35s;
 .mainBtn{
 background:linear-gradient(135deg,#8b5cf6,#6366f1);
 color:white;
-margin-top:22px;
+margin-top:24px;
 }
 
 .mainBtn:hover{
-transform:translateY(-3px) scale(1.01);
-box-shadow:0 0 35px rgba(139,92,246,.55);
-}
-
-.secondaryBtn{
-background:#059669;
-color:white;
-margin-top:15px;
-}
-
-.deleteBtn{
-background:#dc2626;
-color:white;
-margin-top:15px;
+transform:translateY(-3px);
+box-shadow:0 0 30px rgba(139,92,246,.45);
 }
 
 .status{
 margin-top:22px;
 text-align:center;
 color:#cbd5e1;
-font-size:15px;
 min-height:24px;
-}
-
-.ritual{
-display:none;
-padding:50px 0;
-text-align:center;
-}
-
-.orbit{
-width:140px;
-height:140px;
-margin:auto;
-position:relative;
-}
-
-.ring{
-position:absolute;
-inset:0;
-border-radius:50%;
-border:1px solid rgba(255,255,255,.15);
-animation:spin 10s linear infinite;
-}
-
-.ring:nth-child(2){
-inset:15px;
-animation-direction:reverse;
-animation-duration:7s;
-}
-
-.core{
-position:absolute;
-inset:35px;
-border-radius:50%;
-background:radial-gradient(circle,#8b5cf6,transparent 75%);
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:900;
-letter-spacing:3px;
-}
-
-@keyframes spin{
-from{transform:rotate(0deg);}
-to{transform:rotate(360deg);}
 }
 
 .deckZone{
 display:none;
+margin-top:28px;
 }
 
 .deckGuide{
 text-align:center;
-margin-bottom:18px;
+margin-bottom:20px;
 letter-spacing:2px;
 color:#e2e8f0;
 }
 
 .selectionCount{
 text-align:center;
-margin-bottom:22px;
+margin-bottom:24px;
 font-size:18px;
 font-weight:900;
-color:#facc15;
+color:var(--gold);
 }
 
 .massDeck{
@@ -276,112 +198,87 @@ transform:rotateY(180deg);
 .face{
 position:absolute;
 inset:0;
-backface-visibility:hidden;
 border-radius:24px;
 overflow:hidden;
+backface-visibility:hidden;
 }
 
 .back{
+background:
+linear-gradient(135deg,#4338ca,#1e1b4b);
 display:flex;
 align-items:center;
 justify-content:center;
 font-size:48px;
-background:linear-gradient(135deg,#4338ca,#1e1b4b);
-border:2px solid rgba(255,255,255,.12);
-box-shadow:0 0 35px rgba(139,92,246,.35), inset 0 0 25px rgba(255,255,255,.06);
-position:relative;
-}
-
-.back::before{
-content:"✦";
-animation:float 3s ease infinite;
-}
-
-.back::after{
-content:"";
-position:absolute;
-inset:8px;
-border-radius:20px;
-border:1px solid rgba(255,255,255,.1);
-}
-
-.pickCard:hover .back{
-transform:translateY(-8px) rotateZ(-1deg);
+border:2px solid rgba(255,255,255,.08);
+box-shadow:
+0 0 30px rgba(139,92,246,.3),
+inset 0 0 25px rgba(255,255,255,.04);
 }
 
 .front{
 transform:rotateY(180deg);
-background:rgba(15,23,42,.96);
-border:1px solid rgba(255,255,255,.08);
-padding:18px;
+padding:16px;
 display:flex;
 flex-direction:column;
 justify-content:center;
 align-items:center;
 text-align:center;
+background:#0f172a;
+border:1px solid rgba(255,255,255,.06);
 }
 
 .role{
 font-size:11px;
 letter-spacing:2px;
-color:#cbd5e1;
 margin-bottom:12px;
+color:#cbd5e1;
 }
 
 .cardTitle{
 font-size:18px;
 font-weight:900;
-margin-bottom:12px;
+margin-bottom:14px;
 line-height:1.3;
 }
 
 .cardMeaning{
 font-size:13px;
-line-height:1.8;
+line-height:1.7;
 color:#d1d5db;
 }
 
-.positive .cardTitle{color:var(--gold);}
+.positive .cardTitle{color:#facc15;}
 .negative .cardTitle{color:#f87171;}
 .love .cardTitle{color:#f472b6;}
-.action .cardTitle{color:#fb923c;}
-.spiritual .cardTitle{color:#93c5fd;}
 .shadow .cardTitle{color:#c084fc;}
-
-.special{
-animation:special 1.8s infinite;
-}
-
-@keyframes special{
-0%{box-shadow:0 0 10px gold;}
-50%{box-shadow:0 0 40px gold;}
-100%{box-shadow:0 0 10px gold;}
-}
-
-@keyframes float{
-0%{transform:translateY(0);}
-50%{transform:translateY(-10px);}
-100%{transform:translateY(0);}
-}
+.spiritual .cardTitle{color:#93c5fd;}
+.action .cardTitle{color:#fb923c;}
 
 .readingBox{
 display:none;
 margin-top:35px;
-padding:36px;
+padding:34px;
 border-radius:30px;
-background:rgba(15,23,42,.84);
+background:rgba(15,23,42,.88);
 border:1px solid rgba(255,255,255,.08);
-backdrop-filter:blur(16px);
 line-height:2;
+white-space:pre-wrap;
 }
 
 .readingBox h2{
+margin-bottom:26px;
 font-size:34px;
-margin-bottom:24px;
 }
 
-.tags{
-margin-top:18px;
+.mysticLine{
+margin:28px 0;
+height:1px;
+background:
+linear-gradient(90deg,
+transparent,
+rgba(255,255,255,.3),
+transparent);
 }
 
 .tag{
@@ -393,829 +290,840 @@ margin:4px;
 font-size:13px;
 }
 
-.mysticLine{
-margin:28px 0;
-height:1px;
-background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
-}
-
-.fateBar{
-height:18px;
-background:#020617;
-border-radius:999px;
-overflow:hidden;
-margin-top:10px;
-}
-
-.fateFill{
-height:100%;
-width:0;
-transition:2s;
-background:linear-gradient(90deg,#8b5cf6,#facc15);
-}
-
-.historyItem{
-padding:20px 0;
-border-top:1px solid rgba(255,255,255,.08);
-}
-
-.historyDate{
-color:#94a3b8;
-font-size:13px;
-margin-bottom:12px;
-}
-
-.historyQuestion{
-color:#facc15;
-margin-bottom:12px;
-}
-
-.empty{
-color:#94a3b8;
-}
-
-.stats{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:18px;
-margin-top:20px;
-}
-
-.statCard{
-background:#020617;
-border-radius:20px;
-padding:20px;
-border:1px solid rgba(255,255,255,.06);
-}
-
-.statNumber{
-font-size:28px;
-font-weight:900;
-margin-top:10px;
-color:#facc15;
-}
-
-.whisper{
-margin-top:24px;
-padding:18px;
-border-radius:22px;
-background:rgba(255,255,255,.04);
-border:1px solid rgba(255,255,255,.06);
-font-style:italic;
-}
-
-.deepBtn{
-margin-top:26px;
-background:#7c3aed;
-color:white;
-}
-
-.hiddenEvent{
-position:fixed;
-inset:0;
-pointer-events:none;
-overflow:hidden;
-z-index:999;
-}
-
-.feather{
-position:absolute;
-font-size:24px;
-animation:fall linear forwards;
-opacity:.85;
-}
-
-@keyframes fall{
-0%{transform:translateY(-10vh) rotate(0deg);opacity:0;}
-15%{opacity:1;}
-100%{transform:translateY(110vh) translateX(100px) rotate(360deg);opacity:0;}
-}
-
 @media(max-width:900px){
-.grid{grid-template-columns:1fr;}
-.title{font-size:36px;}
-.massDeck{grid-template-columns:repeat(2,1fr);}
-.readingBox{padding:22px;}
+
+.grid{
+grid-template-columns:1fr;
+}
+
+.title{
+font-size:38px;
+}
+
+.massDeck{
+grid-template-columns:repeat(2,1fr);
+}
+
 }
 
 </style>
 </head>
-<body>
 
-<div class="hiddenEvent" id="hiddenEvent"></div>
+<body>
 
 <div class="container">
 
-<div class="title">👼 ANGEL ANSWERS ORACLE 👼</div>
-<div class="subtitle">ULTIMATE DIVINE SYSTEM</div>
+<div class="title">
+👼 ANGEL ANSWERS 👼
+</div>
+
+<div class="subtitle">
+DEEP PSYCHO ORACLE SYSTEM
+</div>
 
 <div class="panel">
 
 <div class="grid">
 
 <div>
+
 <label>質問</label>
-<textarea id="question" placeholder="例：あの人は今どう思っていますか？"></textarea>
+
+<textarea id="question"
+placeholder="例：あの人は今どう思っていますか？"></textarea>
+
 </div>
 
 <div>
+
 <label>テーマ</label>
+
 <select id="theme">
+
 <option value="love">恋愛</option>
-<option value="work">仕事</option>
-<option value="future">未来</option>
 <option value="relationship">人間関係</option>
+<option value="future">未来</option>
+<option value="work">仕事</option>
 <option value="spiritual">スピリチュアル</option>
+
 </select>
 
 <label>スプレッド</label>
+
 <select id="spreadType">
-<option value="1">1枚神託</option>
+
 <option value="3">3枚展開</option>
 <option value="5">5枚深層展開</option>
-<option value="7">7枚運命神託</option>
+<option value="7">7枚運命解析</option>
+
 </select>
-</div>
 
 </div>
 
-<button class="mainBtn" onclick="startRitual()">神託を開始する</button>
-<button class="secondaryBtn" onclick="saveReading()">現在の結果を保存</button>
-<button class="deleteBtn" onclick="deleteHistory()">保存履歴を全削除</button>
+</div>
+
+<button class="mainBtn"
+onclick="startReading()">
+
+神託を開始する
+
+</button>
 
 <div class="status" id="status">
-静かに深呼吸をして質問を念じてください
-</div>
-
-<div class="ritual" id="ritual">
-<div class="orbit">
-<div class="ring"></div>
-<div class="ring"></div>
-<div class="core">PRAY</div>
-</div>
-<div style="margin-top:20px;color:#cbd5e1;">
-天使達が運命を読み取っています...
-</div>
+静かに質問を念じてください
 </div>
 
 </div>
 
 <div class="deckZone" id="deckZone">
-<div class="deckGuide">直感でカードを選んでください</div>
-<div class="selectionCount" id="selectionCount">0 / 0</div>
-<div class="massDeck" id="massDeck"></div>
+
+<div class="deckGuide">
+直感でカードを選択してください
 </div>
 
-<div class="readingBox" id="readingBox"></div>
-
-<div class="panel">
-<h2>統計</h2>
-<div class="stats">
-<div class="statCard">
-総リーディング数
-<div class="statNumber" id="totalReadings">0</div>
-</div>
-<div class="statCard">
-最も出現したカード
-<div class="statNumber" id="topCard">-</div>
-</div>
-<div class="statCard">
-今日の運命指数
-<div class="statNumber" id="fateLevel">88%</div>
-</div>
-</div>
+<div class="selectionCount"
+id="selectionCount">
+0 / 0
 </div>
 
-<div class="panel">
-<h2>保存履歴</h2>
-<div id="historyContent">
-<div class="empty">保存履歴はありません</div>
+<div class="massDeck"
+id="massDeck"></div>
+
 </div>
-</div>
+
+<div class="readingBox"
+id="readingBox"></div>
 
 </div>
 
 <script>
 
-const audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-
-function tone(freq,duration=.4,type="sine",volume=.03){
-const osc=audioCtx.createOscillator();
-const gain=audioCtx.createGain();
-osc.type=type;
-osc.frequency.value=freq;
-osc.connect(gain);
-gain.connect(audioCtx.destination);
-gain.gain.setValueAtTime(volume,audioCtx.currentTime);
-gain.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+duration);
-osc.start();
-osc.stop(audioCtx.currentTime+duration);
-}
+/* =========================
+UTILITY
+========================= */
 
 function secureRandom(max){
+
 const arr=new Uint32Array(1);
+
 crypto.getRandomValues(arr);
+
 return arr[0]%max;
+
 }
 
 function shuffle(array){
+
 for(let i=array.length-1;i>0;i--){
+
 const j=secureRandom(i+1);
-[array[i],array[j]]=[array[j],array[i]];
+
+[array[i],array[j]]=
+[array[j],array[i]];
+
 }
+
 }
 
 function randomItem(arr){
+
 return arr[secureRandom(arr.length)];
+
 }
 
 function escapeHTML(str){
+
 return str
 .replace(/&/g,"&amp;")
 .replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/\"/g,"&quot;")
-.replace(/'/g,"&#039;");
+.replace(/>/g,"&gt;");
+
 }
+
+/* =========================
+AUDIO
+========================= */
+
+const audioCtx=
+new(window.AudioContext||
+window.webkitAudioContext)();
+
+function tone(freq,duration=.4){
+
+const osc=audioCtx.createOscillator();
+const gain=audioCtx.createGain();
+
+osc.frequency.value=freq;
+
+osc.connect(gain);
+gain.connect(audioCtx.destination);
+
+gain.gain.setValueAtTime(
+0.03,
+audioCtx.currentTime
+);
+
+gain.gain.exponentialRampToValueAtTime(
+0.0001,
+audioCtx.currentTime+duration
+);
+
+osc.start();
+osc.stop(audioCtx.currentTime+duration);
+
+}
+
+/* =========================
+ROLES
+========================= */
 
 const roles={
-1:["神託"],
+
 3:["過去","現在","未来"],
-5:["現状","障害","本音","行動","結果"],
-7:["現状","潜在意識","相手","障害","行動","近未来","最終結果"]
+
+5:[
+"現状",
+"障害",
+"本音",
+"行動",
+"結果"
+],
+
+7:[
+"現状",
+"潜在意識",
+"相手本音",
+"障害",
+"行動",
+"近未来",
+"最終結果"
+]
+
 };
 
+/* =========================
+CARD DATABASE
+========================= */
+
 const cards=[
-{name:"YES",type:"positive",weight:9,emotion:40,truth:70,action:50,delay:10,destiny:60,meanings:["流れは前向きです。","願いは動き始めています。"]},
-{name:"YES!",type:"positive",weight:3,emotion:80,truth:90,action:85,delay:0,destiny:95,meanings:["極めて強い肯定です。","運命レベルの追い風です。"]},
-{name:"NO",type:"negative",weight:8,emotion:20,truth:80,action:10,delay:60,destiny:20,meanings:["今は噛み合っていません。","慎重さが必要です。"]},
-{name:"NO!",type:"negative",weight:3,emotion:15,truth:95,action:5,delay:80,destiny:10,meanings:["強い警告があります。","無理押しは危険です。"]},
-{name:"WAIT",type:"neutral",weight:7,emotion:40,truth:75,action:5,delay:90,destiny:50,meanings:["時が必要です。","急ぐほど流れが乱れます。"]},
-{name:"ROMANCE",type:"love",weight:8,emotion:95,truth:70,action:55,delay:30,destiny:70,meanings:["感情はかなり動いています。","恋愛エネルギーが高まっています。"]},
-{name:"SOULMATE",type:"love",weight:1,emotion:100,truth:95,action:70,delay:10,destiny:100,meanings:["魂レベルの縁があります。"]},
-{name:"TRUST",type:"spiritual",weight:7,emotion:50,truth:90,action:40,delay:20,destiny:80,meanings:["直感を信じてください。"]},
-{name:"SUCCESS",type:"positive",weight:7,emotion:50,truth:85,action:75,delay:5,destiny:80,meanings:["成功の流れがあります。"]},
-{name:"TAKE ACTION",type:"action",weight:6,emotion:45,truth:70,action:100,delay:0,destiny:75,meanings:["行動が必要です。"]},
-{name:"LET GO",type:"neutral",weight:5,emotion:70,truth:85,action:15,delay:30,destiny:60,meanings:["執着を手放してください。"]},
-{name:"DIVINE TIMING",type:"spiritual",weight:5,emotion:55,truth:90,action:35,delay:50,destiny:95,meanings:["宇宙のタイミングです。"]},
-{name:"DECEPTION",type:"shadow",weight:3,emotion:40,truth:95,action:10,delay:60,destiny:20,meanings:["見えていない本音があります。"]},
-{name:"FALSE HOPE",type:"shadow",weight:2,emotion:80,truth:90,action:5,delay:70,destiny:15,meanings:["期待が先行しすぎています。"]},
-{name:"REPEATING KARMA",type:"shadow",weight:2,emotion:70,truth:92,action:15,delay:50,destiny:40,meanings:["同じ課題を繰り返しています。"]},
-{name:"MIRACLE",type:"positive",weight:1,emotion:90,truth:100,action:80,delay:0,destiny:100,meanings:["極めて稀な奇跡の暗示です。"]},
-{name:"NOT THIS PERSON",type:"shadow",weight:1,emotion:30,truth:100,action:5,delay:20,destiny:5,meanings:["執着が判断を曇らせています。"]}
+
+{
+name:"YES",
+type:"positive",
+
+energy:{
+emotion:65,
+truth:75,
+movement:70,
+fear:20,
+avoidance:10,
+attachment:40
+},
+
+meanings:[
+"流れは前向きです。",
+"現実ラインが繋がり始めています。"
+]
+
+},
+
+{
+name:"NO",
+type:"negative",
+
+energy:{
+emotion:20,
+truth:90,
+movement:10,
+fear:75,
+avoidance:80,
+attachment:15
+},
+
+meanings:[
+"現段階では噛み合っていません。",
+"動くほど崩れやすい状態です。"
+]
+
+},
+
+{
+name:"WAIT",
+type:"neutral",
+
+energy:{
+emotion:50,
+truth:80,
+movement:5,
+fear:65,
+avoidance:55,
+attachment:45
+},
+
+meanings:[
+"感情整理が終わっていません。",
+"タイミングが止まっています。"
+]
+
+},
+
+{
+name:"ROMANCE",
+type:"love",
+
+energy:{
+emotion:95,
+truth:65,
+movement:60,
+fear:40,
+avoidance:20,
+attachment:95
+},
+
+meanings:[
+"感情はかなり強く動いています。",
+"理性より感情が優勢です。"
+]
+
+},
+
+{
+name:"DECEPTION",
+type:"shadow",
+
+energy:{
+emotion:40,
+truth:95,
+movement:20,
+fear:90,
+avoidance:90,
+attachment:25
+},
+
+meanings:[
+"本音を隠しています。",
+"感情開示を恐れています。"
+]
+
+},
+
+{
+name:"SOULMATE",
+type:"spiritual",
+
+energy:{
+emotion:100,
+truth:90,
+movement:70,
+fear:15,
+avoidance:10,
+attachment:100
+},
+
+meanings:[
+"魂レベルの共鳴があります。",
+"偶然では終わらない縁です。"
+]
+
+},
+
+{
+name:"FALSE HOPE",
+type:"shadow",
+
+energy:{
+emotion:80,
+truth:90,
+movement:10,
+fear:60,
+avoidance:25,
+attachment:95
+},
+
+meanings:[
+"理想化が強くなっています。",
+"現実より期待が先行しています。"
+]
+
+},
+
+{
+name:"TAKE ACTION",
+type:"action",
+
+energy:{
+emotion:55,
+truth:70,
+movement:100,
+fear:15,
+avoidance:5,
+attachment:55
+},
+
+meanings:[
+"停滞打破が必要です。",
+"行動によって流れが変わります。"
+]
+
+}
+
 ];
 
+/* =========================
+STATE
+========================= */
+
 let currentReading=[];
-let currentQuestion="";
-let currentTheme="";
 let spread=0;
+let currentQuestion="";
 
-function weightedDeck(){
-let pool=[];
+/* =========================
+START
+========================= */
 
-cards.forEach(card=>{
-let weight=card.weight;
+function startReading(){
 
-if(currentTheme==="love"&&card.type==="love") weight+=4;
-if(currentTheme==="spiritual"&&card.type==="spiritual") weight+=4;
-if(currentTheme==="work"&&card.name==="SUCCESS") weight+=5;
-
-for(let i=0;i<weight;i++){
-pool.push({...card});
-}
-
-});
-
-shuffle(pool);
-return pool;
-}
-
-function startRitual(){
-const q=document.getElementById("question").value.trim();
+const q=
+document.getElementById("question")
+.value.trim();
 
 if(q===""){
+
 alert("質問を入力してください");
 return;
+
 }
 
 currentQuestion=q;
-currentTheme=document.getElementById("theme").value;
-spread=parseInt(document.getElementById("spreadType").value);
+
+spread=parseInt(
+document.getElementById("spreadType")
+.value
+);
 
 currentReading=[];
 
-document.getElementById("ritual").style.display="block";
-document.getElementById("deckZone").style.display="none";
-document.getElementById("readingBox").style.display="none";
+document.getElementById("deckZone")
+.style.display="block";
 
-document.getElementById("status").innerHTML="天使達と接続しています...";
+document.getElementById("readingBox")
+.style.display="none";
 
-tone(432,2);
+document.getElementById("selectionCount")
+.innerHTML=`0 / ${spread}`;
 
-setTimeout(createSelectionDeck,3500);
+document.getElementById("status")
+.innerHTML=
+"直感でカードを選択してください";
+
+createDeck();
+
 }
 
-function createSelectionDeck(){
+/* =========================
+CREATE DECK
+========================= */
 
-document.getElementById("ritual").style.display="none";
-document.getElementById("deckZone").style.display="block";
-document.getElementById("status").innerHTML="直感でカードを選んでください";
+function createDeck(){
 
-document.getElementById("selectionCount").innerHTML=`0 / ${spread}`;
+const deck=
+document.getElementById("massDeck");
 
-const deckDiv=document.getElementById("massDeck");
-deckDiv.innerHTML="";
-
-const pool=weightedDeck();
+deck.innerHTML="";
 
 const display=[];
 
 for(let i=0;i<28;i++){
-display.push(pool[secureRandom(pool.length)]);
+
+display.push(
+cards[secureRandom(cards.length)]
+);
+
 }
 
 shuffle(display);
 
-let selectedCount=0;
+let selected=0;
 
-
-display.forEach((card,index)=>{
+display.forEach(card=>{
 
 const div=document.createElement("div");
 
 div.className="pickCard";
 
-const meaning=randomItem(card.meanings);
-
-const rare=secureRandom(100)<5?"special":"";
-
-const role=roles[spread][selectedCount]||"";
-
-
 div.innerHTML=`
+
 <div class="pickInner">
-<div class="face back ${rare}"></div>
+
+<div class="face back">
+✦
+</div>
+
 <div class="face front ${card.type}">
-<div class="role">${role}</div>
-<div class="cardTitle">${card.name}</div>
-<div class="cardMeaning">${meaning}</div>
+
+<div class="role">---</div>
+
+<div class="cardTitle">
+${card.name}
 </div>
+
+<div class="cardMeaning">
+${randomItem(card.meanings)}
 </div>
+
+</div>
+
+</div>
+
 `;
 
 let opened=false;
 
-
 div.addEventListener("click",()=>{
 
 if(opened) return;
-if(selectedCount>=spread) return;
+
+if(selected>=spread) return;
 
 opened=true;
-selectedCount++;
-
-const realRole=roles[spread][selectedCount-1];
 
 div.classList.add("selected");
 
-tone([444,555,666,777][secureRandom(4)],.5);
+tone([444,555,666][secureRandom(3)]);
+
+const role=
+roles[spread][selected];
+
+div.querySelector(".role")
+.innerHTML=role;
 
 currentReading.push({
-role:realRole,
-card,
-meaning
+role,
+card
 });
 
-if(card.name==="MIRACLE"){
-featherRain();
-}
+selected++;
 
-setTimeout(()=>{
-const roleEl=div.querySelector(".role");
-roleEl.innerHTML=realRole;
-},400);
+document.getElementById(
+"selectionCount"
+).innerHTML=
+`${selected} / ${spread}`;
 
-
-document.getElementById("selectionCount").innerHTML=`${selectedCount} / ${spread}`;
-
-if(selectedCount===spread){
+if(selected===spread){
 
 setTimeout(()=>{
 generateReading();
-},1800);
+},1400);
 
 }
 
 });
 
-
-deckDiv.appendChild(div);
+deck.appendChild(div);
 
 });
 
 }
 
-function featherRain(){
-const zone=document.getElementById("hiddenEvent");
-
-for(let i=0;i<25;i++){
-
-const feather=document.createElement("div");
-feather.className="feather";
-feather.innerHTML="🪽";
-
-feather.style.left=Math.random()*100+"vw";
-feather.style.animationDuration=4+Math.random()*5+"s";
-feather.style.fontSize=20+Math.random()*20+"px";
-
-zone.appendChild(feather);
-
-setTimeout(()=>{
-feather.remove();
-},8000);
-
-}
-}
+/* =========================
+DEEP READING ENGINE
+========================= */
 
 function generateReading(){
 
-const names=currentReading.map(r=>r.card.name);
+const reading=
+document.getElementById("readingBox");
 
-let emotion=0;
-let truth=0;
-let action=0;
-let delay=0;
-let destiny=0;
+let scores={
+
+emotion:0,
+truth:0,
+movement:0,
+fear:0,
+avoidance:0,
+attachment:0
+
+};
 
 currentReading.forEach(r=>{
-emotion+=r.card.emotion;
-truth+=r.card.truth;
-action+=r.card.action;
-delay+=r.card.delay;
-destiny+=r.card.destiny;
+
+Object.keys(scores).forEach(k=>{
+
+scores[k]+=r.card.energy[k];
+
 });
 
-emotion=Math.floor(emotion/currentReading.length);
-truth=Math.floor(truth/currentReading.length);
-action=Math.floor(action/currentReading.length);
-delay=Math.floor(delay/currentReading.length);
-destiny=Math.floor(destiny/currentReading.length);
+});
 
-let temperature="";
+Object.keys(scores).forEach(k=>{
 
-if(emotion>=80){
-temperature="相手感情はかなり強く、抑え込み切れていません。";
-}else if(emotion>=55){
-temperature="感情はありますが、波があります。";
+scores[k]=Math.floor(
+scores[k]/currentReading.length
+);
+
+});
+
+const names=
+currentReading.map(r=>r.card.name);
+
+let text="";
+
+text+="🔮 DIVINE READING 🔮\n\n";
+
+text+=`質問：${currentQuestion}\n\n`;
+
+text+="━━━━━━━━━━━━━━\n\n";
+
+currentReading.forEach(r=>{
+
+text+=`${r.role}\n`;
+
+text+=`${r.card.name}\n`;
+
+text+=`${randomItem(r.card.meanings)}\n\n`;
+
+});
+
+text+="━━━━━━━━━━━━━━\n\n";
+
+text+="【感情構造】\n\n";
+
+if(scores.emotion>=80){
+
+text+=
+"感情エネルギーはかなり強く出ています。\n";
+
+}else if(scores.emotion>=55){
+
+text+=
+"感情は存在していますが、波があります。\n";
+
 }else{
-temperature="感情面はまだ不安定か控えめです。";
+
+text+=
+"感情面はまだ閉鎖的です。\n";
+
 }
 
-let honesty="";
+if(scores.avoidance>=70){
 
-if(truth>=85){
-honesty="今回かなり“本音”が強く出ています。";
-}else{
-honesty="表面と本音にズレがあります。";
+text+=
+"しかし同時に“感情を見せる恐れ”がかなり強く出ています。\n";
+
 }
 
-let movement="";
+if(scores.fear>=70){
 
-if(action>=70){
-movement="状況は比較的動きやすいです。";
-}else if(action>=40){
-movement="ゆっくり流れが変化しています。";
-}else{
-movement="今は停滞感がかなり強めです。";
+text+=
+"特に傷つくこと・失うことへの警戒が強いです。\n";
+
 }
 
-let timing="";
+text+="\n";
 
-if(delay>=70){
-timing="時間は必要です。すぐの結果を求めるほど空回りしやすいでしょう。";
-}else if(delay>=40){
-timing="少しずつ状況整理が進んでいます。";
-}else{
-timing="比較的早めに動きが出る可能性があります。";
+text+="【潜在意識】\n\n";
+
+if(names.includes("ROMANCE")){
+
+text+=
+"相手側の感情自体は既に動いています。\n";
+
 }
-
-let destinyLine="";
-
-if(destiny>=85){
-destinyLine="運命的要素がかなり強く出ています。";
-}else if(destiny>=60){
-destinyLine="偶然では片付けにくい縁があります。";
-}else{
-destinyLine="未来はまだ大きく変化可能です。";
-}
-
-let danger="";
 
 if(names.includes("DECEPTION")){
-danger+="相手は全てを見せていません。 ";
+
+text+=
+"ただし本音はかなり抑圧されています。\n";
+
+text+=
+"これは悪意というより“防衛反応”です。\n";
+
+}
+
+if(names.includes("WAIT")){
+
+text+=
+"現状は感情不足ではなく、停止状態です。\n";
+
 }
 
 if(names.includes("FALSE HOPE")){
-danger+="理想化が強くなっています。 ";
+
+text+=
+"質問者側の理想化も強く混ざっています。\n";
+
 }
 
-if(names.includes("NOT THIS PERSON")){
-danger+="執着によって本来の答えを見失っている可能性があります。 ";
+text+="\n";
+
+text+="【矛盾解析】\n\n";
+
+if(
+names.includes("ROMANCE")
+&&
+names.includes("DECEPTION")
+){
+
+text+=
+"感情はあります。しかし同時に、その感情を認めることを恐れています。\n";
+
 }
 
-if(names.includes("REPEATING KARMA")){
-danger+="同じ感情パターンを繰り返している暗示があります。 ";
+if(
+names.includes("YES")
+&&
+names.includes("WAIT")
+){
+
+text+=
+"流れ自体は悪くありません。ただしタイミングが一致していません。\n";
+
 }
 
-let combo="";
+if(
+names.includes("SOULMATE")
+&&
+names.includes("NO")
+){
 
-if(names.includes("ROMANCE")&&names.includes("WAIT")){
-combo="感情自体は存在しています。ただし相手側に迷いや事情があり、まだ流れが固定されていません。";
+text+=
+"魂レベルでは強く惹かれていても、現実では成立困難な障害があります。\n";
+
 }
 
-if(names.includes("YES!")&&names.includes("TAKE ACTION")){
-combo="今は受け身より行動です。流れはかなり追い風です。";
+text+="\n";
+
+text+="【心理分析】\n\n";
+
+if(
+scores.attachment>=80
+&&
+scores.avoidance>=60
+){
+
+text+=
+"近づきたい気持ちと逃げたい気持ちが同時存在しています。\n";
+
 }
 
-if(names.includes("ROMANCE")&&names.includes("DECEPTION")){
-combo="感情はあります。しかし素直に出せない事情や隠し事が見えています。";
+if(
+scores.fear>=70
+&&
+scores.avoidance>=70
+){
+
+text+=
+"相手は感情そのものより、“感情によって起きる変化”を恐れています。\n";
+
 }
 
-if(names.includes("SOULMATE")&&names.includes("DIVINE TIMING")){
-combo="これは偶然的な縁ではありません。タイミングが動く時に関係も急激に変化します。";
+if(scores.movement>=70){
+
+text+=
+"停滞を破る動きは今後発生しやすいです。\n";
+
+}else{
+
+text+=
+"今はまだ流れが固定され切っていません。\n";
+
 }
 
-if(names.includes("NO!")&&names.includes("ROMANCE")){
-combo="感情があっても、現状はかなり不安定です。押しすぎるほど崩れやすくなります。";
+text+="\n";
+
+text+="【未来推移】\n\n";
+
+const first=currentReading[0];
+const last=
+currentReading[currentReading.length-1];
+
+if(
+first.card.name==="ROMANCE"
+&&
+last.card.name==="WAIT"
+){
+
+text+=
+"感情は動いたものの、途中で停止しています。\n";
+
 }
 
-let whisper=randomItem([
-"あなたは既に違和感に気づいています。",
-"心より先に魂が反応しています。",
-"見ないふりを続けているものがあります。",
-"運命は静かに方向を変え始めています。",
-"恐れより直感を優先してください。"
-]);
+if(
+first.card.name==="WAIT"
+&&
+last.card.name==="TAKE ACTION"
+){
 
-let summary=`
-${temperature}
-${honesty}
-${movement}
-${timing}
-${destinyLine}
-${combo}
-${danger}
-`;
+text+=
+"長い停滞後に流れが再始動する暗示があります。\n";
 
-const fate=Math.max(5,Math.min(100,
-Math.floor((emotion+truth+action+destiny-delay)/4)
-));
+}
 
-const reading=document.getElementById("readingBox");
+if(last.card.name==="YES"){
 
-let html=`
-<h2>🔮 DIVINE READING 🔮</h2>
+text+=
+"最終的には前向きな方向へ収束しやすいです。\n";
 
-<p><strong>質問：</strong>${escapeHTML(currentQuestion)}</p>
+}
 
-<div class="mysticLine"></div>
-`;
+if(last.card.name==="NO"){
 
-currentReading.forEach(r=>{
+text+=
+"現状維持のままだと閉鎖方向へ進みやすいです。\n";
 
-html+=`
-<p>
-<strong>${r.role}</strong><br>
-${r.card.name}<br>
-${r.meaning}
-</p>
-`;
+}
 
-});
+text+="\n";
 
-html+=`
-<div class="mysticLine"></div>
+text+="【総合結論】\n\n";
 
-<h3 style="margin-bottom:18px;">総合神託</h3>
+if(
+scores.emotion>=80
+&&
+scores.avoidance>=70
+){
 
-<p>${summary}</p>
+text+=
+"今回の問題は“感情不足”ではありません。\n";
 
-<div style="margin-top:24px;">
-感情温度 : ${emotion}%<br>
-本音率 : ${truth}%<br>
-行動可能性 : ${action}%<br>
-停滞度 : ${delay}%<br>
-運命濃度 : ${destiny}%
-</div>
+text+=
+"むしろ感情が強いからこそ、防衛反応も強く出ています。\n";
 
-<div style="margin-top:26px;">
-運命流動率
-<div class="fateBar">
-<div class="fateFill" id="fateFill"></div>
-</div>
-<div style="margin-top:12px;font-size:30px;font-weight:900;color:#facc15;">
-${fate}%
-</div>
-</div>
+text+=
+"相手側は既に心を動かしていますが、その感情によって関係が変化することを恐れています。\n";
 
-<div class="whisper">
-“ ${whisper} ”
-</div>
+text+=
+"そのため現在の停滞は、無関心ではなく『感情制御』によって発生しています。\n";
 
-<div class="tags">
-`;
+}else if(scores.movement>=70){
 
-currentReading.forEach(r=>{
-html+=`<span class="tag">${r.role} : ${r.card.name}</span>`;
-});
+text+=
+"状況は停滞期を抜け始めています。\n";
 
-html+=`</div>
+text+=
+"受け身より行動によって流れが変化する段階です。\n";
 
-<button class="deepBtn" onclick="clarifierCard()">
-深層カードを追加で引く
-</button>
-`;
+}else{
 
-reading.innerHTML=html;
+text+=
+"現時点では感情・現実・タイミングが完全一致していません。\n";
+
+text+=
+"ただし水面下では感情変化が継続しています。\n";
+
+}
+
+reading.innerHTML=
+`<h2>🔮 DIVINE READING 🔮</h2>${text}`;
+
 reading.style.display="block";
-
-setTimeout(()=>{
-document.getElementById("fateFill").style.width=fate+"%";
-},300);
 
 window.scrollTo({
 top:reading.offsetTop-40,
 behavior:"smooth"
 });
 
-if(fate>=90){
-featherRain();
 }
-
-updateStats();
-
-}
-
-function clarifierCard(){
-
-const card=randomItem(cards);
-const text=randomItem([
-"このカードは“隠れている本音”を示しています。",
-"今もっとも重要なのはここです。",
-"深層意識ではこの流れが強く動いています。"
-]);
-
-const reading=document.getElementById("readingBox");
-
-reading.innerHTML+=`
-<div class="mysticLine"></div>
-<h3>🜂 深層カード 🜂</h3>
-<p>
-${card.name}<br>
-${randomItem(card.meanings)}
-</p>
-<p>${text}</p>
-`;
-
-window.scrollTo({
-top:reading.scrollHeight,
-behavior:"smooth"
-});
-
-}
-
-function saveReading(){
-
-if(currentReading.length===0){
-alert("まだ結果がありません");
-return;
-}
-
-const history=JSON.parse(localStorage.getItem("ultimateAngelOracle"))||[];
-
-history.unshift({
-id:Date.now(),
-date:new Date().toLocaleString(),
-question:currentQuestion,
-cards:currentReading,
-summary:document.getElementById("readingBox").innerText.slice(0,300)
-});
-
-localStorage.setItem("ultimateAngelOracle",JSON.stringify(history.slice(0,50)));
-
-loadHistory();
-updateStats();
-
-alert("保存しました");
-
-}
-
-function loadHistory(){
-
-const history=JSON.parse(localStorage.getItem("ultimateAngelOracle"))||[];
-
-const content=document.getElementById("historyContent");
-
-if(history.length===0){
-content.innerHTML=`<div class="empty">保存履歴はありません</div>`;
-return;
-}
-
-let html="";
-
-history.forEach(item=>{
-
-html+=`
-<div class="historyItem">
-<div class="historyDate">${item.date}</div>
-<div class="historyQuestion">❓ ${escapeHTML(item.question)}</div>
-`;
-
-item.cards.forEach(c=>{
-html+=`<span class="tag">${c.role} : ${c.card.name}</span>`;
-});
-
-html+=`
-<div style="margin-top:16px;color:#cbd5e1;line-height:1.8;">
-${escapeHTML(item.summary)}...
-</div>
-
-<button
-style="margin-top:14px;background:#7f1d1d;color:white;border:none;padding:10px 14px;border-radius:12px;cursor:pointer;"
-onclick="deleteSingleHistory(${item.id})">
-この履歴を削除
-</button>
-
-</div>
-`;
-
-});
-
-content.innerHTML=html;
-
-}
-
-function deleteSingleHistory(id){
-
-let history=JSON.parse(localStorage.getItem("ultimateAngelOracle"))||[];
-
-history=history.filter(h=>h.id!==id);
-
-localStorage.setItem("ultimateAngelOracle",JSON.stringify(history));
-
-loadHistory();
-updateStats();
-
-}
-
-function deleteHistory(){
-
-if(!confirm("履歴を全削除しますか？")) return;
-
-localStorage.removeItem("ultimateAngelOracle");
-
-loadHistory();
-updateStats();
-
-}
-
-function updateStats(){
-
-const history=JSON.parse(localStorage.getItem("ultimateAngelOracle"))||[];
-
-
-document.getElementById("totalReadings").innerHTML=history.length;
-
-const counts={};
-
-history.forEach(item=>{
-item.cards.forEach(c=>{
-counts[c.card.name]=(counts[c.card.name]||0)+1;
-});
-});
-
-let max=0;
-let top="-";
-
-for(let key in counts){
-if(counts[key]>max){
-max=counts[key];
-top=key;
-}
-}
-
-
-document.getElementById("topCard").innerHTML=top;
-
-const today=new Date().getDate();
-
-document.getElementById("fateLevel").innerHTML=
-70+(today%30)+"%";
-
-}
-
-loadHistory();
-updateStats();
 
 </script>
 
