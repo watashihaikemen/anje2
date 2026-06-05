@@ -29,7 +29,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 40px 20px; /* 上下の余白を確保してハミ出しを防止 */
+            padding: 40px 20px;
         }
 
         .wrapper {
@@ -38,12 +38,12 @@
             gap: 30px;
             width: 100%;
             max-width: 960px;
-            background: rgba(255, 255, 255, 0.03);
+            /* 【軽量化】重い backdrop-filter を廃止し、不透明度を調整した背景色に変更 */
+            background: rgba(255, 255, 255, 0.04);
             padding: 25px;
             border-radius: 24px;
-            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            margin: auto; /* どんな画面サイズでも完全に中央に配置 */
+            margin: auto;
         }
 
         .player-container {
@@ -56,6 +56,8 @@
             gap: 20px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
             min-width: 320px;
+            /* 【軽量化】レンダリングの最適化指示 */
+            contain: content;
         }
 
         .video-screen {
@@ -159,7 +161,7 @@
         }
 
         .btn:hover {
-            color: var(--accent-color);
+            color: var(--text-color);
             transform: scale(1.05);
         }
 
@@ -196,7 +198,6 @@
             text-shadow: 0 0 10px rgba(29, 185, 84, 0.5);
         }
 
-        /* 1曲ループ時の特別カラー（識別用） */
         .btn.active-once {
             color: #00e676;
             text-shadow: 0 0 10px rgba(0, 230, 118, 0.6);
@@ -226,6 +227,8 @@
             flex-direction: column;
             gap: 15px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            /* 【軽量化】レンダリングの最適化指示 */
+            contain: content;
         }
 
         .playlist-header {
@@ -240,6 +243,7 @@
             overflow-y: auto;
             max-height: 400px;
             padding-right: 5px;
+            position: relative;
         }
 
         .track-list::-webkit-scrollbar {
@@ -255,23 +259,16 @@
 
         .track-item {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
             padding: 10px 14px;
             border-radius: 8px;
-            cursor: grab; /* 掴めることを示すカーソルに変更 */
-            transition: background 0.2s, transform 0.2s;
             margin-bottom: 4px;
-            user-select: none; /* ドラッグ中のテキスト選択を防止 */
-        }
-
-        .track-item:active {
-            cursor: grabbing;
-        }
-
-        /* ドラッグ中の要素のスタイル */
-        .track-item.dragging {
-            opacity: 0.4;
-            background-color: var(--control-bg);
+            user-select: none;
+            -webkit-user-select: none;
+            /* 【軽量化】GPU駆動を促し、ドラッグ時のカクつきを抑える */
+            will-change: transform;
         }
 
         .track-item:hover {
@@ -285,6 +282,47 @@
 
         .track-item.playing .list-title {
             color: var(--accent-color);
+        }
+
+        .track-meta {
+            flex: 1;
+            min-width: 0;
+            cursor: pointer;
+        }
+
+        .list-title, .list-artist {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .list-artist {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .drag-handle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 40px;
+            margin-left: 10px;
+            cursor: grab;
+            color: var(--text-muted);
+            touch-action: none;
+        }
+        
+        .drag-handle:active {
+            cursor: grabbing;
+            color: var(--accent-color);
+        }
+
+        .track-item.dragging {
+            opacity: 0.5;
+            background-color: var(--control-bg);
+            border: 1px dashed var(--accent-color);
         }
 
         @media (max-width: 768px) {
@@ -333,7 +371,7 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
             </button>
             <button id="repeat-btn" class="btn btn-small" title="リピート: オフ">
-                </button>
+            </button>
         </div>
 
         <div class="volume-container">
@@ -349,7 +387,6 @@
 </div>
 
 <script>
-    // 初期状態の並び順（LocalStorageに保存された並び順があればそれを優先）
     let defaultSongs = [
         { artist: 'カネコアヤノ', title: '恋しい日々', id: 'K1XlKpqqA24' },
         { artist: 'カネコアヤノ', title: '眠れない', id: 'wyLuh2uC0cg' },
@@ -369,25 +406,16 @@
     ];
 
     let songs = JSON.parse(localStorage.getItem('wm_songs')) || defaultSongs;
-
-    // LocalStorageから前回の状態を読み込み（なければデフォルト値）
     let currentIndex = parseInt(localStorage.getItem('wm_currentIndex')) || 0;
     let isShuffle = localStorage.getItem('wm_isShuffle') === 'true';
-    // repeatMode: 0 = オフ(順次再生して終了), 1 = 全曲リピート, 2 = 1曲ループ
     let repeatMode = parseInt(localStorage.getItem('wm_repeatMode')) || 0; 
     let currentVolume = parseInt(localStorage.getItem('wm_volume')) || 50;
 
-    // インデックスの安全弁（曲リストが変更された場合などの対策）
     if (currentIndex >= songs.length || currentIndex < 0) currentIndex = 0;
 
     let player;
     let isPlaying = false;
     let updateTimer;
-
-    const tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
     const trackListEl = document.getElementById('track-list');
     const trackCountEl = document.getElementById('track-count');
@@ -404,77 +432,139 @@
     const currentTimeEl = document.getElementById('current-time');
     const totalDurationEl = document.getElementById('total-duration');
 
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
     function initPlaylist() {
         trackCountEl.textContent = songs.length;
         trackListEl.innerHTML = '';
+        
         songs.forEach((song, index) => {
             const li = document.createElement('li');
             li.className = `track-item ${index === currentIndex ? 'playing' : ''}`;
-            li.setAttribute('draggable', 'true'); // ドラッグ可能にする
+            li.setAttribute('draggable', 'true');
             li.setAttribute('data-index', index);
-            li.innerHTML = `
+            
+            const metaDiv = document.createElement('div');
+            metaDiv.className = 'track-meta';
+            metaDiv.innerHTML = `
                 <div class="list-title">${song.title}</div>
                 <div class="list-artist">${song.artist}</div>
             `;
-            
-            // クリックで曲選択
-            li.addEventListener('click', (e) => {
-                // ドラッグ操作とバッティングしないよう単純クリック時のみ動作
-                if(li.classList.contains('dragging')) return;
+            metaDiv.addEventListener('click', () => {
                 selectTrack(index);
-                player.playVideo(); 
+                player.playVideo();
             });
 
-            // ドラッグ＆ドロップイベントの登録
+            const handleDiv = document.createElement('div');
+            handleDiv.className = 'drag-handle';
+            handleDiv.innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="4" y1="8" x2="20" y2="8"></line>
+                    <line x1="4" y1="16" x2="20" y2="16"></line>
+                </svg>
+            `;
+
+            li.appendChild(metaDiv);
+            li.appendChild(handleDiv);
+
             li.addEventListener('dragstart', handleDragStart);
             li.addEventListener('dragend', handleDragEnd);
+
+            handleDiv.addEventListener('touchstart', (e) => handleTouchStart(e, li), { passive: false });
+            handleDiv.addEventListener('touchmove', handleTouchMove, { passive: false });
+            handleDiv.addEventListener('touchend', handleTouchEnd);
 
             trackListEl.appendChild(li);
         });
 
-        // リスト全体へのドラッグオーバー・ドロップイベント
         trackListEl.addEventListener('dragover', handleDragOver);
         trackListEl.addEventListener('drop', handleDrop);
 
         updatePlayerUI();
     }
 
-    // --- ドラッグ＆ドロップ用ロジック ---
-    let dragSrcIndex = null;
-
     function handleDragStart(e) {
-        dragSrcIndex = parseInt(this.getAttribute('data-index'));
         this.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
     }
 
     function handleDragEnd(e) {
         this.classList.remove('dragging');
-        const items = trackListEl.querySelectorAll('.track-item');
-        items.forEach(item => item.classList.remove('dragging'));
+        finalizeOrder();
     }
 
+    // 【軽量化】高頻度で発生するdragover時のレイアウト計算（リフロー）を抑制するためのフラグ
+    let dragOverTick = false;
     function handleDragOver(e) {
-        e.preventDefault(); // ドロップを許可するために必要
-        e.dataTransfer.dropEffect = 'move';
+        e.preventDefault();
+        if (dragOverTick) return;
+        dragOverTick = true;
         
-        const draggingItem = trackListEl.querySelector('.dragging');
-        if (!draggingItem) return;
-
-        // マウス位置に一番近い要素を取得して、その手前か後ろに挿入
-        const siblings = [...trackListEl.querySelectorAll('.track-item:not(.dragging)')];
-        let nextSibling = siblings.find(sibling => {
-            const box = sibling.getBoundingClientRect();
-            return e.clientY <= box.top + box.height / 2;
+        requestAnimationFrame(() => {
+            const draggingItem = trackListEl.querySelector('.dragging');
+            if (draggingItem) {
+                const nextSibling = getDragAfterElement(trackListEl, e.clientY);
+                trackListEl.insertBefore(draggingItem, nextSibling);
+            }
+            dragOverTick = false;
         });
-        
-        trackListEl.insertBefore(draggingItem, nextSibling);
     }
 
     function handleDrop(e) {
         e.preventDefault();
-        
-        // 視覚的な並び順から新しい配列のインデックスを再構築
+    }
+
+    let activeTouchElement = null;
+
+    function handleTouchStart(e, targetLi) {
+        activeTouchElement = targetLi;
+        activeTouchElement.classList.add('dragging');
+    }
+
+    // 【軽量化】TouchMoveも同様にアニメーションフレームで間引く
+    let touchMoveTick = false;
+    function handleTouchMove(e) {
+        if (!activeTouchElement) return;
+        e.preventDefault();
+        if (touchMoveTick) return;
+        touchMoveTick = true;
+
+        requestAnimationFrame(() => {
+            if (activeTouchElement) {
+                const touch = e.touches[0];
+                const nextSibling = getDragAfterElement(trackListEl, touch.clientY);
+                trackListEl.insertBefore(activeTouchElement, nextSibling);
+            }
+            touchMoveTick = false;
+        });
+    }
+
+    function handleTouchEnd(e) {
+        if (activeTouchElement) {
+            activeTouchElement.classList.remove('dragging');
+            activeTouchElement = null;
+            finalizeOrder();
+        }
+    }
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.track-item:not(.dragging)')];
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    // 【軽量化】重かった全リセット(initPlaylist)をやめ、DOMの並び順からデータを再構築する爆速処理に変更
+    function finalizeOrder() {
         const items = [...trackListEl.querySelectorAll('.track-item')];
         const newSongs = [];
         let newCurrentIndex = currentIndex;
@@ -482,23 +572,18 @@
         items.forEach((item, newIdx) => {
             const oldIdx = parseInt(item.getAttribute('data-index'));
             newSongs.push(songs[oldIdx]);
-            
-            // 現在再生中の曲の新しい位置を特定
-            if (oldIdx === currentIndex) {
+            // DOMのカスタムアトリビュートを新しいインデックスに上書き
+            item.setAttribute('data-index', newIdx);
+            if (item.classList.contains('playing')) {
                 newCurrentIndex = newIdx;
             }
         });
         
-        // データの更新と保存
         songs = newSongs;
         currentIndex = newCurrentIndex;
         localStorage.setItem('wm_songs', JSON.stringify(songs));
         localStorage.setItem('wm_currentIndex', currentIndex);
-        
-        // DOMをクリーンに再構成（インデックスの再割り当て）
-        initPlaylist();
     }
-    // ------------------------------------
 
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('youtube-player', {
@@ -509,7 +594,9 @@
                 'controls': 0,
                 'disablekb': 1,
                 'rel': 0,
-                'modestbranding': 1
+                'modestbranding': 1,
+                'showinfo': 0,
+                'iv_load_policy': 3
             },
             events: {
                 'onReady': onPlayerReady,
@@ -520,8 +607,6 @@
 
     function onPlayerReady(event) {
         initPlaylist();
-        
-        // 保存データのUI反映
         volumeBar.value = currentVolume;
         player.setVolume(currentVolume);
         shuffleBtn.classList.toggle('active', isShuffle);
@@ -561,8 +646,6 @@
     function selectTrack(index) {
         if (index < 0 || index >= songs.length) return;
         currentIndex = index;
-        
-        // 状態保存
         localStorage.setItem('wm_currentIndex', currentIndex);
         
         const items = trackListEl.querySelectorAll('.track-item');
@@ -608,21 +691,16 @@
         localStorage.setItem('wm_volume', currentVolume);
     }
 
-    // 曲が終了したときの判定
     function handleTrackEnded() {
         if (repeatMode === 2) {
-            // 1曲ループ
             player.playVideo();
         } else {
-            // 自動終了のフラグを立てて次へ
             nextTrack(true);
         }
     }
 
-    // 次の曲（isAutoEnd: 自動で曲が終わって遷移したかどうか）
     function nextTrack(isAutoEnd = false) {
         if (isShuffle) {
-            // シャッフル時は現在の曲以外からランダム選曲（1曲だけの場合はそのまま）
             let randomIndex = currentIndex;
             if (songs.length > 1) {
                 while (randomIndex === currentIndex) {
@@ -635,12 +713,10 @@
             let nextIndex = currentIndex + 1;
             if (nextIndex >= songs.length) {
                 if (repeatMode === 1 || !isAutoEnd) {
-                    // 全曲リピートON、または手動で「次へ」を押した場合は最初に戻る
                     nextIndex = 0;
                     selectTrack(nextIndex);
                     player.playVideo();
                 } else {
-                    // リピートオフかつ全曲終了なら再生を停止
                     isPlaying = false;
                     setPlayIcon(false);
                 }
@@ -658,7 +734,6 @@
         player.playVideo();
     }
 
-    // リピートボタンのUIと状態管理を更新
     function updateRepeatButtonUI() {
         if (repeatMode === 0) {
             repeatBtn.className = "btn btn-small";
@@ -671,7 +746,6 @@
         } else if (repeatMode === 2) {
             repeatBtn.className = "btn btn-small active-once";
             repeatBtn.title = "リピート: 1曲";
-            // 1曲ループと分かるように、中央に「1」のバッジを入れたSVG
             repeatBtn.innerHTML = `
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/>
@@ -695,7 +769,7 @@
         }
     });
 
-    nextBtn.addEventListener('click', () => nextTrack(false)); // 手動スキップ
+    nextBtn.addEventListener('click', () => nextTrack(false));
     prevBtn.addEventListener('click', prevTrack);
 
     shuffleBtn.addEventListener('click', () => {
@@ -704,7 +778,6 @@
         localStorage.setItem('wm_isShuffle', isShuffle);
     });
 
-    // リピートボタンクリック（オフ -> 全曲 -> 1曲 の3パターン切り替え）
     repeatBtn.addEventListener('click', () => {
         repeatMode = (repeatMode + 1) % 3;
         localStorage.setItem('wm_repeatMode', repeatMode);
