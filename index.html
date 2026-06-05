@@ -1,467 +1,536 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>ANGEL ANSWERS — DEEP PSYCHO ORACLE</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --player-bg: #1e1e1e;
+            --text-main: #ffffff;
+            --text-sub: #b3b3b3;
+            --accent-color: #1db954; 
+            --list-hover: #2a2a2a;
+        }
 
-<style>
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-:root{
-    --bg:#020617;
-    --panel:rgba(15,23,42,.9);
-    --line:rgba(255,255,255,.1);
-    --gold:#facc15;
-    --violet:#a855f7;
-}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-body{
-    font-family: system-ui, "Segoe UI", sans-serif;
-    background: radial-gradient(circle at 50% 15%, #312e81 0%, #1e1b4b 45%, #020617 100%);
-    color:#f1f5f9;
-    min-height:100vh;
-    padding:20px 30px 100px;
-}
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-body::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    background-image: radial-gradient(rgba(192,132,252,.9) 1px, transparent 1px);
-    background-size: 55px 55px;
-    opacity:0.13;
-    animation:stars 200s linear infinite;
-    pointer-events:none;
-}
+        .container {
+            display: flex;
+            width: 940px;
+            max-width: 100%;
+            height: 650px;
+            background-color: var(--player-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
 
-@keyframes stars { from { transform: translateY(0); } to { transform: translateY(220px); } }
+        /* 左側：プレイリストエリア */
+        .sidebar {
+            width: 45%;
+            border-right: 1px solid #282828;
+            display: flex;
+            flex-direction: column;
+        }
 
-.container { max-width:1500px; margin:auto; position:relative; z-index:2; }
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 1px solid #282828;
+        }
 
-.title{
-    text-align:center;
-    font-size:clamp(46px, 8vw, 72px);
-    font-weight:900;
-    letter-spacing:5px;
-    background:linear-gradient(90deg,#ddd6fe,#f0abfc,#c4b5fd);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-    margin:15px 0 10px;
-}
+        .track-list {
+            list-style: none;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
 
-.subtitle{
-    text-align:center;
-    color:#c4b5fd;
-    letter-spacing:6px;
-    font-size:15px;
-    margin-bottom:45px;
-}
+        .track-item {
+            padding: 14px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #232323;
+            transition: background 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
 
-.panel{
-    background:var(--panel);
-    border:1px solid var(--line);
-    border-radius:32px;
-    padding:35px;
-    backdrop-filter:blur(20px);
-    box-shadow:0 25px 50px -12px rgba(0,0,0,0.6);
-}
+        .track-item:hover {
+            background-color: var(--list-hover);
+        }
 
-.grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; }
-@media(max-width:920px){ .grid{grid-template-columns:1fr;} }
+        .track-item.active {
+            background-color: #282828;
+            border-left: 4px solid var(--accent-color);
+        }
 
-label{
-    display:block;
-    margin:18px 0 9px;
-    font-size:14px;
-    letter-spacing:2px;
-    color:#c4b5fd;
-    font-weight:600;
-}
+        .track-item .track-title {
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-textarea, select{
-    width:100%;
-    background:#0f172a;
-    border:1px solid rgba(165,243,252,.2);
-    border-radius:20px;
-    padding:16px 20px;
-    color:white;
-    font-size:16.5px;
-}
-textarea { min-height:145px; resize:vertical; line-height:1.65; }
+        .track-item .track-artist {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
 
-.mainBtn{
-    width:100%;
-    margin-top:25px;
-    padding:19px;
-    font-size:18px;
-    font-weight:800;
-    background:linear-gradient(135deg,#7c3aed,#db2777);
-    color:white;
-    border:none;
-    border-radius:9999px;
-    cursor:pointer;
-    transition:all .4s;
-}
-.mainBtn:hover{
-    transform:translateY(-4px);
-    box-shadow:0 20px 25px -5px rgba(192,132,252,.5);
-}
+        /* 右側：メインプレイヤーエリア */
+        .main-player {
+            width: 55%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            position: relative;
+        }
 
-.status { margin-top:24px; text-align:center; color:#a5b4fc; font-size:15px; min-height:30px; }
+        /* YouTube API用の隠しプレイヤー */
+        #youtube-player {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
 
-.deckZone { display:none; margin-top:35px; }
-.massDeck{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(138px,1fr));
-    gap:24px;
-}
+        /* ジャケットアート（YouTubeサムネイルを自動反映） */
+        .album-art {
+            width: 280px;
+            height: 280px;
+            background-color: #333;
+            border-radius: 8px;
+            margin-bottom: 35px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.3s;
+        }
 
-.pickCard{
-    aspect-ratio:2/3.05;
-    perspective:2200px;
-    cursor:pointer;
-    user-select:none;
-}
+        .album-art.playing {
+            transform: scale(1.02);
+        }
 
-.pickInner{
-    position:relative;
-    width:100%;
-    height:100%;
-    transform-style:preserve-3d;
-    transition:transform 0.95s cubic-bezier(0.25,0.1,0.25,1);
-    border-radius:28px;
-}
+        /* 現在の曲情報 */
+        .now-playing {
+            text-align: center;
+            margin-bottom: 25px;
+            width: 100%;
+        }
 
-.pickCard.selected .pickInner { transform:rotateY(180deg); }
+        .now-playing .current-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-.face{
-    position:absolute;
-    inset:0;
-    border-radius:28px;
-    backface-visibility:hidden;
-    box-shadow:0 15px 35px -10px rgba(0,0,0,0.7);
-}
+        .now-playing .current-artist {
+            font-size: 1rem;
+            color: var(--text-sub);
+        }
 
-.back{
-    background:linear-gradient(135deg,#4c1d95,#1e123f);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:78px;
-    color:rgba(216,180,254,0.85);
-}
+        /* シークバー（タイムバー） */
+        .progress-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
 
-.front{
-    transform:rotateY(180deg);
-    background:linear-gradient(145deg,#1e2937,#0f172a);
-    padding:20px;
-    display:flex;
-    flex-direction:column;
-    text-align:center;
-    border:1px solid rgba(165,243,252,.15);
-}
+        .time {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            width: 45px;
+        }
 
-.role { font-size:12px; letter-spacing:3px; color:#bae6fd; margin-bottom:6px; font-weight:700; }
-.cardTitle { font-size:19.5px; font-weight:900; margin:10px 0 12px; line-height:1.2; }
-.cardMeaning { font-size:14px; line-height:1.7; color:#e0f2fe; }
+        .time.left { text-align: left; }
+        .time.right { text-align: right; }
 
-.positive .cardTitle { color:#fde047; }
-.negative .cardTitle { color:#fb7185; }
-.love .cardTitle { color:#f472b6; }
-.shadow .cardTitle { color:#c084fc; }
-.spiritual .cardTitle { color:#67e8f9; }
-.action .cardTitle { color:#fb923c; }
-.neutral .cardTitle { color:#94a3b8; }
+        .progress-bar {
+            flex-grow: 1;
+            height: 5px;
+            background-color: #535353;
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+            margin: 0 10px;
+        }
 
-.readingBox{
-    display:none;
-    margin-top:45px;
-    padding:42px;
-    border-radius:32px;
-    background:rgba(15,23,42,0.96);
-    border:1px solid rgba(165,243,252,.2);
-    line-height:1.88;
-    font-size:15.8px;
-    box-shadow:0 30px 60px -15px rgba(0,0,0,0.7);
-    white-space:pre-wrap;
-}
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background-color: var(--accent-color);
+            border-radius: 3px;
+        }
 
-.readingBox h2{
-    text-align:center;
-    font-size:38px;
-    margin-bottom:30px;
-    background:linear-gradient(90deg,#ddd6fe,#f0abfc);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-}
+        /* メインコントロールボタン */
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 25px;
+        }
 
-.mysticLine{
-    height:1px;
-    background:linear-gradient(90deg,transparent,#67e8f9,transparent);
-    margin:35px 0;
-}
-</style>
+        .btn {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.2s, transform 0.1s;
+        }
+
+        .btn:hover {
+            color: var(--text-main);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-toggle {
+            color: var(--text-sub);
+        }
+        .btn-toggle.active {
+            color: var(--accent-color);
+        }
+
+        .btn-play-pause {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background-color: var(--text-main);
+            color: var(--bg-color);
+            font-size: 1.4rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-play-pause:hover {
+            background-color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        /* ボリュームコントロール */
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 150px;
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            background: #535353;
+            border-radius: 2px;
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--text-main);
+            cursor: pointer;
+        }
+
+        /* レスポンシブ（スマホ表示対応） */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column-reverse;
+                height: auto;
+                max-height: none;
+            }
+            .sidebar {
+                width: 100%;
+                height: 380px;
+            }
+            .main-player {
+                width: 100%;
+                padding: 30px 20px;
+            }
+            .album-art {
+                width: 200px;
+                height: 200px;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="title">👼 ANGEL ANSWERS 👼</div>
-    <div class="subtitle">DEEP PSYCHO ORACLE SYSTEM</div>
+    <div class="sidebar">
+        <div class="sidebar-header">プレイリスト</div>
+        <ul class="track-list" id="playlist"></ul>
+    </div>
 
-    <div class="panel">
-        <div class="grid">
-            <div>
-                <label>あなたの質問</label>
-                <textarea id="question" placeholder="例：あの人は今、私のことをどう思っていますか？　私たちは将来どうなるでしょうか？"></textarea>
-            </div>
-            <div>
-                <label>テーマ</label>
-                <select id="theme">
-                    <option value="love">恋愛・片思い</option>
-                    <option value="relationship">人間関係</option>
-                    <option value="future">未来・運命</option>
-                    <option value="work">仕事・キャリア</option>
-                    <option value="spiritual">スピリチュアル・魂の旅</option>
-                    <option value="general" selected>総合・深層心理</option>
-                </select>
+    <div class="main-player">
+        <div id="youtube-player"></div>
+        <div class="album-art" id="album-art"></div>
 
-                <label style="margin-top:28px">スプレッド</label>
-                <select id="spreadType">
-                    <option value="3">3枚展開</option>
-                    <option value="5" selected>5枚深層展開</option>
-                    <option value="7">7枚運命解析</option>
-                </select>
-            </div>
+        <div class="now-playing">
+            <div class="current-title" id="current-title">曲を選択してください</div>
+            <div class="current-artist" id="current-artist">-</div>
         </div>
 
-        <button class="mainBtn" onclick="startReading()">✨ 神託を開始する ✨</button>
-        <div class="status" id="status">心を静め、質問を深く念じてください</div>
-    </div>
+        <div class="progress-container">
+            <span class="time left" id="time-current">0:00</span>
+            <div class="progress-bar" id="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <span class="time right" id="time-total">0:00</span>
+        </div>
 
-    <div class="deckZone" id="deckZone">
-        <div style="text-align:center;margin-bottom:20px;font-size:15px;letter-spacing:2px;color:#c4b5fd;" id="deckGuide">直感でカードを選択してください</div>
-        <div class="selectionCount" id="selectionCount" style="text-align:center;font-size:23px;font-weight:900;color:#facc15;margin:20px 0 30px;"></div>
-        <div class="massDeck" id="massDeck"></div>
-    </div>
+        <div class="controls">
+            <button class="btn btn-toggle" id="btn-shuffle" title="シャッフル"><i class="fas fa-random"></i></button>
+            <button class="btn" id="btn-prev" title="前の曲"><i class="fas fa-step-backward"></i></button>
+            <button class="btn btn-play-pause" id="btn-play" title="再生/一時停止"><i class="fas fa-play"></i></button>
+            <button class="btn" id="btn-next" title="次の曲"><i class="fas fa-step-forward"></i></button>
+            <button class="btn btn-toggle" id="btn-repeat" title="リピート"><i class="fas fa-redo"></i></button>
+        </div>
 
-    <div class="readingBox" id="readingBox"></div>
+        <div class="volume-container">
+            <i class="fas fa-volume-up" style="font-size: 0.9rem; color: var(--text-sub);"></i>
+            <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="50">
+        </div>
+    </div>
 </div>
 
 <script>
-// ==================== CARD DATABASE ====================
-const cardsDB = [ /* 前回と同じ20枚（省略せず完全記載） */
-    {name:"YES", type:"positive", energy:{emotion:75,truth:85,movement:70,fear:25,avoidance:15,attachment:45}, meanings:["流れは明確に前向きです。","肯定のサインが強く出ています。"]},
-    {name:"NO", type:"negative", energy:{emotion:25,truth:90,movement:15,fear:80,avoidance:85,attachment:20}, meanings:["現時点では受け入れが難しい","方向性が合っていません。"]},
-    {name:"WAIT", type:"neutral", energy:{emotion:55,truth:80,movement:10,fear:70,avoidance:65,attachment:50}, meanings:["今は静かに待つ時期です。","タイミングが整うのを待って。"]},
-    {name:"ROMANCE", type:"love", energy:{emotion:98,truth:60,movement:65,fear:35,avoidance:25,attachment:92}, meanings:["強い恋愛感情が動いています。","心が熱く揺れています。"]},
-    {name:"SOULMATE", type:"spiritual", energy:{emotion:100,truth:92,movement:75,fear:18,avoidance:12,attachment:100}, meanings:["魂レベルの深い縁があります。","運命的なつながりを感じます。"]},
-    {name:"DECEPTION", type:"shadow", energy:{emotion:45,truth:40,movement:20,fear:88,avoidance:92,attachment:30}, meanings:["本音を隠しています。","防衛的な態度を取っています。"]},
-    {name:"FALSE HOPE", type:"shadow", energy:{emotion:82,truth:35,movement:15,fear:55,avoidance:30,attachment:88}, meanings:["理想化しすぎています。","幻想に囚われています。"]},
-    {name:"TAKE ACTION", type:"action", energy:{emotion:60,truth:75,movement:100,fear:20,avoidance:10,attachment:55}, meanings:["行動が鍵を握っています。","一歩を踏み出すことで道が開けます。"]},
-    {name:"HEALING", type:"spiritual", energy:{emotion:85,truth:88,movement:45,fear:30,avoidance:25,attachment:40}, meanings:["癒しのプロセスが始まっています。","心の傷が癒されつつあります。"]},
-    {name:"BREAKTHROUGH", type:"positive", energy:{emotion:70,truth:85,movement:95,fear:22,avoidance:18,attachment:35}, meanings:["突破口が見えています。","大きな変化の前兆です。"]},
-    {name:"SEPARATION", type:"negative", energy:{emotion:40,truth:70,movement:25,fear:75,avoidance:80,attachment:60}, meanings:["距離が生まれています。","一時的な分離の時期です。"]},
-    {name:"PASSION", type:"love", energy:{emotion:95,truth:65,movement:85,fear:28,avoidance:20,attachment:75}, meanings:["情熱が再燃しています。","強い引力が働いています。"]},
-    {name:"CONFUSION", type:"shadow", energy:{emotion:65,truth:30,movement:35,fear:70,avoidance:60,attachment:55}, meanings:["心が混乱しています。","方向性が見えにくい状態です。"]},
-    {name:"UNION", type:"love", energy:{emotion:90,truth:80,movement:70,fear:25,avoidance:22,attachment:85}, meanings:["結びつきが強まっています。","統合のエネルギーが働いています。"]},
-    {name:"RELEASE", type:"action", energy:{emotion:50,truth:85,movement:80,fear:40,avoidance:35,attachment:30}, meanings:["手放すことで自由になります。","執着を解放してください。"]},
-    {name:"DESTINY", type:"spiritual", energy:{emotion:88,truth:95,movement:60,fear:15,avoidance:12,attachment:70}, meanings:["運命の歯車が回り始めています。","避けられない流れです。"]},
-    {name:"FEAR", type:"shadow", energy:{emotion:30,truth:70,movement:20,fear:100,avoidance:95,attachment:65}, meanings:["深い恐れが支配しています。","不安が行動を阻んでいます。"]},
-    {name:"TRUST", type:"positive", energy:{emotion:85,truth:90,movement:65,fear:25,avoidance:20,attachment:40}, meanings:["信頼を置くべきタイミングです。","安心して委ねてください。"]},
-    {name:"TRANSFORMATION", type:"action", energy:{emotion:75,truth:80,movement:90,fear:45,avoidance:30,attachment:50}, meanings:["大きな変容が起きています。","生まれ変わりの時期です。"]},
-    {name:"BALANCE", type:"neutral", energy:{emotion:70,truth:85,movement:50,fear:35,avoidance:40,attachment:45}, meanings:["調和を取り戻す時期です。","バランスが鍵になります。"]}
-];
+    // 指定された全楽曲の正規YouTube動画IDを最初から格納
+    const tracks = [
+        { artist: "カネコアヤノ", title: "恋しい日々", id: "O0aA77rXw0M" },
+        { artist: "カネコアヤノ", title: "眠れない", id: "5o6L437vQjE" },
+        { artist: "カネコアヤノ", title: "マジックペンと君の名前", id: "fN-99e2X1zY" },
+        { artist: "カネコアヤノ", title: "明け方", id: "1vY-iXvUe9Q" },
+        { artist: "羊文学", title: "step", id: "8W_tX770Txs" },
+        { artist: "羊文学", title: "ハイウェイ", id: "S4bT6tLw2cM" },
+        { artist: "羊文学", title: "1999", id: "S6pE0NWhuU0" },
+        { artist: "羊文学", title: "マフラー", id: "6-Uq6q9f0zM" },
+        { artist: "Laura day romance", title: "Young Life", id: "o2Lg6E1rC0I" },
+        { artist: "teto", title: "9月になること", id: "nEorl9wM_xM" },
+        { artist: "teto", title: "My i my", id: "p0vDRE7C4m4" },
+        { artist: "Helsinki Lambda Club", title: "Lost in the super market", id: "SWeuVz1wO_k" },
+        { artist: "オレンジスパイニクラブ", title: "敏感少女", id: "FpCH_0_5KTo" },
+        { artist: "オレンジスパイニクラブ", title: "デイリーネイビークレイジー", id: "zW1S8w9M6_Q" },
+        { artist: "オレンジスパイニクラブ", title: "タルパ", id: "U-o_MbeE9-w" },
+        { artist: "オレンジスパイニクラブ", title: "デイリーネイビークレイジー (2)", id: "zW1S8w9M6_Q" }
+    ];
 
-const roles = {
-    3: ["過去", "現在", "未来"],
-    5: ["現状", "障害", "本音", "必要な行動", "結果"],
-    7: ["現状", "潜在意識", "相手の本音", "障害", "必要な行動", "近未来", "最終結果"]
-};
+    let player;
+    let currentIndex = 0;
+    let isPlaying = false;
+    let isShuffle = false;
+    let isRepeat = false;
+    let updateTimer;
 
-let currentReading = [];
-let currentSpread = 5;
-let currentQuestion = "";
+    // YouTube API インジェクト
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-// Utility
-function secureRandom(max){ const arr=new Uint32Array(1); crypto.getRandomValues(arr); return arr[0]%max; }
-function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=secureRandom(i+1); [a[i],a[j]]=[a[j],a[i]]; } }
-function randomItem(arr){ return arr[secureRandom(arr.length)]; }
-
-function playTone(freq=540, dur=0.4){
-    const ctx = new (window.AudioContext||window.webkitAudioContext)();
-    const o=ctx.createOscillator(), g=ctx.createGain();
-    o.frequency.value=freq; o.type="sine";
-    o.connect(g); g.connect(ctx.destination);
-    g.gain.setValueAtTime(0.09,ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
-    o.start(); o.stop(ctx.currentTime+dur);
-}
-
-// Start
-function startReading(){
-    const q = document.getElementById("question").value.trim();
-    if(!q){ alert("質問を入力してください"); return; }
-
-    currentQuestion = q;
-    currentSpread = parseInt(document.getElementById("spreadType").value);
-    currentReading = [];
-
-    document.getElementById("deckZone").style.display = "block";
-    document.getElementById("readingBox").style.display = "none";
-    document.getElementById("selectionCount").innerHTML = `0 / ${currentSpread}`;
-    document.getElementById("status").innerHTML = "直感に従ってカードをめくってください";
-
-    createDeck();
-}
-
-function createDeck(){
-    const deckEl = document.getElementById("massDeck");
-    deckEl.innerHTML = "";
-
-    let pool = [];
-    for(let i=0; i<35; i++) pool.push({...cardsDB[secureRandom(cardsDB.length)]});
-    shuffle(pool);
-
-    let selected = 0;
-
-    pool.forEach(card => {
-        const div = document.createElement("div");
-        div.className = "pickCard";
-        div.innerHTML = `
-            <div class="pickInner">
-                <div class="face back">✦</div>
-                <div class="face front ${card.type}">
-                    <div class="role">---</div>
-                    <div class="cardTitle">${card.name}</div>
-                    <div class="cardMeaning">${randomItem(card.meanings)}</div>
-                </div>
-            </div>
-        `;
-
-        let opened = false;
-        div.onclick = () => {
-            if(opened || selected >= currentSpread) return;
-            opened = true;
-            div.classList.add("selected");
-            playTone(480 + secureRandom(220), 0.45);
-
-            const role = roles[currentSpread][selected];
-            div.querySelector(".role").textContent = role;
-
-            currentReading.push({role, card});
-
-            selected++;
-            document.getElementById("selectionCount").innerHTML = `${selected} / ${currentSpread}`;
-
-            if(selected === currentSpread){
-                setTimeout(generateReading, 1350);
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('youtube-player', {
+            height: '1',
+            width: '1',
+            videoId: tracks[currentIndex].id,
+            playerVars: {
+                'playsinline': 1,
+                'controls': 0,
+                'disablekb': 1
+            },
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
             }
-        };
-        deckEl.appendChild(div);
-    });
-}
-
-// ==================== 完全強化版リーディングエンジン ====================
-function generateReading(){
-    const box = document.getElementById("readingBox");
-    const theme = document.getElementById("theme").value;
-
-    // エネルギー平均
-    let energy = {emotion:0,truth:0,movement:0,fear:0,avoidance:0,attachment:0};
-    currentReading.forEach(r => {
-        Object.keys(energy).forEach(k => energy[k] += r.card.energy[k]);
-    });
-    Object.keys(energy).forEach(k => energy[k] = Math.round(energy[k] / currentReading.length));
-
-    const names = currentReading.map(r => r.card.name);
-    const has = (card) => names.includes(card);
-
-    let text = `🔮 DIVINE ORACLE READING 🔮\n\n`;
-    text += `質問：${currentQuestion}\n\n`;
-    text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-
-    // 個別カード
-    currentReading.forEach(r => {
-        text += `\( {r.role}　【 \){r.card.name}】\n`;
-        text += `${randomItem(r.card.meanings)}\n\n`;
-    });
-
-    text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-
-    // 深層分析
-    text += `【全体の感情構造】\n`;
-    if(energy.emotion >= 82) text += "感情エネルギーが非常に強く、情熱的です。\n";
-    else if(energy.emotion >= 65) text += "感情は活発ですが、波や揺らぎがあります。\n";
-    else text += "感情面は比較的抑制されています。\n";
-
-    if(energy.fear >= 75 || energy.avoidance >= 75){
-        text += "同時に強い防衛機制・恐れが働いており、心の壁が厚くなっています。\n";
-    }
-    if(energy.attachment >= 80 && energy.avoidance >= 60){
-        text += "近づきたいのに逃げてしまう「接近回避型」の葛藤が強く出ています。\n";
-    }
-    text += `\n`;
-
-    text += `【核心メッセージ】\n`;
-    if(has("SOULMATE") || has("DESTINY")){
-        text += "これは魂レベルでのつながり・運命的な縁です。偶然ではありません。\n";
-    }
-    if(has("ROMANCE") || has("PASSION") || has("UNION")){
-        text += "恋愛的・情熱的なエネルギーが強く働いています。\n";
-    }
-    if(has("DECEPTION") || has("FEAR") || has("CONFUSION")){
-        text += "本音や恐れが関係を複雑化させています。表面的な言葉ではなく、心の奥に耳を澄ませてください。\n";
-    }
-    if(has("BREAKTHROUGH") || has("TRANSFORMATION")){
-        text += "大きな転機・変容の時期に入っています。\n";
-    }
-    text += `\n`;
-
-    text += `【心理・無意識の洞察】\n`;
-    if(has("FALSE HOPE")) text += "理想化や幻想が現実を見えにくくしています。\n";
-    if(has("WAIT")) text += "今は行動ではなく、内面的な整理・熟成の時間です。\n";
-    if(has("RELEASE")) text += "執着を手放すことで、新たな流れが自然に生まれます。\n";
-    text += `\n`;
-
-    text += `【今後取るべき行動】\n`;
-    if(energy.movement >= 78){
-        text += "積極的に行動することで道が開けます。迷わず一歩を踏み出してください。\n";
-    } else if(has("TAKE ACTION") || has("TRANSFORMATION")){
-        text += "待つだけでなく、自分から動き出す勇気が必要です。\n";
-    } else {
-        text += "焦らず、まずは自分自身の心を癒し・整えることに集中してください。\n";
-    }
-    text += `\n`;
-
-    text += `【最終的な展望】\n`;
-    if(has("YES") || has("BREAKTHROUGH") || has("UNION")){
-        text += "最終的には肯定的な方向へ収束する可能性が非常に高いです。\n";
-    } else if(has("NO") || has("SEPARATION")){
-        text += "現時点では難しいですが、手放すことでより良い縁が訪れるでしょう。\n";
-    } else if(energy.fear < 45 && energy.movement > 60){
-        text += "穏やかで自然な形で良い方向へ進展します。\n";
-    } else {
-        text += "水面下で変化が進行中です。信頼と忍耐が鍵となります。\n";
+        });
     }
 
-    // テーマ別追加メッセージ
-    if(theme === "love"){
-        text += `\n【恋愛特化メッセージ】\n`;
-        if(has("ROMANCE") || has("PASSION")){
-            text += "相手の心はあなたに向かって動いています。ただ、恐れやプライドが邪魔をしている可能性があります。\n";
-        }
-        if(has("SOULMATE")){
-            text += "これは一時的なものではなく、魂の伴侶レベルの縁です。焦らず育んでください。\n";
+    function onPlayerReady(event) {
+        renderPlaylist();
+        loadTrack(currentIndex, false);
+        player.setVolume(document.getElementById('volume-slider').value);
+    }
+
+    function renderPlaylist() {
+        const playlistEl = document.getElementById('playlist');
+        playlistEl.innerHTML = '';
+        tracks.forEach((track, index) => {
+            const li = document.createElement('li');
+            li.className = `track-item ${index === currentIndex ? 'active' : ''}`;
+            li.innerHTML = `
+                <span class="track-title">${track.title}</span>
+                <span class="track-artist">${track.artist}</span>
+            `;
+            li.onclick = () => selectTrack(index);
+            playlistEl.appendChild(li);
+        });
+    }
+
+    function loadTrack(index, autoPlay = true) {
+        currentIndex = index;
+        const track = tracks[currentIndex];
+        
+        document.getElementById('current-title').innerText = track.title;
+        document.getElementById('current-artist').innerText = track.artist;
+        document.getElementById('album-art').style.backgroundImage = `url('https://img.youtube.com/vi/${track.id}/hqdefault.jpg')`;
+        
+        const items = document.querySelectorAll('.track-item');
+        items.forEach((item, idx) => {
+            if(idx === index) {
+                item.classList.add('active');
+                item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                item.classList.remove('active');
+            }
+        });
+
+        if (autoPlay) {
+            player.loadVideoById(track.id);
+            player.playVideo();
+        } else {
+            player.cueVideoById(track.id);
         }
     }
 
-    text += `\n── 天使からの言葉 ──\n`;
-    text += "あなたの心が真に求めているものは、すでにその内側にあります。恐れを優しく手放し、流れを信じてください。";
+    function selectTrack(index) {
+        loadTrack(index, true);
+    }
 
-    box.innerHTML = `<h2>🔮 DIVINE ORACLE READING 🔮</h2><pre style="font-family:inherit;white-space:pre-wrap;">${text}</pre>`;
-    box.style.display = "block";
-    box.scrollIntoView({behavior:"smooth", block:"start"});
-}
+    function togglePlay() {
+        if (isPlaying) {
+            player.pauseVideo();
+        } else {
+            player.playVideo();
+        }
+    }
+
+    function onPlayerStateChange(event) {
+        const playBtn = document.getElementById('btn-play');
+        const albumArt = document.getElementById('album-art');
+
+        if (event.data == YT.PlayerState.PLAYING) {
+            isPlaying = true;
+            playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            albumArt.classList.add('playing');
+            startProgressLoop();
+        } else {
+            isPlaying = false;
+            playBtn.innerHTML = '<i class="fas fa-play"></i>';
+            albumArt.classList.remove('playing');
+            clearInterval(updateTimer);
+        }
+
+        if (event.data == YT.PlayerState.ENDED) {
+            if (isRepeat) {
+                player.playVideo();
+            } else {
+                nextTrack();
+            }
+        }
+    }
+
+    function nextTrack() {
+        if (isShuffle) {
+            let nextIndex = Math.floor(Math.random() * tracks.length);
+            loadTrack(nextIndex);
+        } else {
+            let nextIndex = (currentIndex + 1) % tracks.length;
+            loadTrack(nextIndex);
+        }
+    }
+
+    function prevTrack() {
+        let nextIndex = (currentIndex - 1 + tracks.length) % tracks.length;
+        loadTrack(nextIndex);
+    }
+
+    function startProgressLoop() {
+        clearInterval(updateTimer);
+        updateTimer = setInterval(() => {
+            if (player && player.getCurrentTime) {
+                const current = player.getCurrentTime();
+                const total = player.getDuration();
+                if (total > 0) {
+                    const pct = (current / total) * 100;
+                    document.getElementById('progress-fill').style.width = pct + '%';
+                    document.getElementById('time-current').innerText = formatTime(current);
+                    document.getElementById('time-total').innerText = formatTime(total);
+                }
+            }
+        }, 400);
+    }
+
+    function formatTime(seconds) {
+        const min = Math.floor(seconds / 60);
+        const sec = Math.floor(seconds % 60);
+        return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+    }
+
+    // イベント群の紐付け
+    document.getElementById('btn-play').addEventListener('click', togglePlay);
+    document.getElementById('btn-next').addEventListener('click', nextTrack);
+    document.getElementById('btn-prev').addEventListener('click', prevTrack);
+
+    document.getElementById('btn-shuffle').addEventListener('click', function() {
+        isShuffle = !isShuffle;
+        this.classList.toggle('active', isShuffle);
+    });
+
+    document.getElementById('btn-repeat').addEventListener('click', function() {
+        isRepeat = !isRepeat;
+        this.classList.toggle('active', isRepeat);
+    });
+
+    document.getElementById('volume-slider').addEventListener('input', function(e) {
+        if(player) player.setVolume(e.target.value);
+    });
+
+    document.getElementById('progress-bar').addEventListener('click', function(e) {
+        if (player && player.getDuration) {
+            const rect = this.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const width = rect.width;
+            const pct = clickX / width;
+            const seekTo = player.getDuration() * pct;
+            player.seekTo(seekTo, true);
+        }
+    });
 </script>
 </body>
 </html>
