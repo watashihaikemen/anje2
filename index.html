@@ -258,9 +258,20 @@
             flex-direction: column;
             padding: 10px 14px;
             border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
+            cursor: grab; /* 掴めることを示すカーソルに変更 */
+            transition: background 0.2s, transform 0.2s;
             margin-bottom: 4px;
+            user-select: none; /* ドラッグ中のテキスト選択を防止 */
+        }
+
+        .track-item:active {
+            cursor: grabbing;
+        }
+
+        /* ドラッグ中の要素のスタイル */
+        .track-item.dragging {
+            opacity: 0.4;
+            background-color: var(--control-bg);
         }
 
         .track-item:hover {
@@ -338,7 +349,8 @@
 </div>
 
 <script>
-    const songs = [
+    // 初期状態の並び順（LocalStorageに保存された並び順があればそれを優先）
+    let defaultSongs = [
         { artist: 'カネコアヤノ', title: '恋しい日々', id: 'K1XlKpqqA24' },
         { artist: 'カネコアヤノ', title: '眠れない', id: 'wyLuh2uC0cg' },
         { artist: 'カネコアヤノ', title: 'マジックペンと君の名前', id: 'hACjZqwsTvo' },
@@ -355,6 +367,8 @@
         { artist: 'オレンジスパイニクラブ', title: 'デイリーネイビークレイジー', id: 'tTNp5XLiFQs' },
         { artist: 'オレンジスパイニクラブ', title: 'タルパ', id: '1aIpRDODQrQ' }
     ];
+
+    let songs = JSON.parse(localStorage.getItem('wm_songs')) || defaultSongs;
 
     // LocalStorageから前回の状態を読み込み（なければデフォルト値）
     let currentIndex = parseInt(localStorage.getItem('wm_currentIndex')) || 0;
@@ -396,18 +410,95 @@
         songs.forEach((song, index) => {
             const li = document.createElement('li');
             li.className = `track-item ${index === currentIndex ? 'playing' : ''}`;
+            li.setAttribute('draggable', 'true'); // ドラッグ可能にする
+            li.setAttribute('data-index', index);
             li.innerHTML = `
                 <div class="list-title">${song.title}</div>
                 <div class="list-artist">${song.artist}</div>
             `;
-            li.addEventListener('click', () => {
+            
+            // クリックで曲選択
+            li.addEventListener('click', (e) => {
+                // ドラッグ操作とバッティングしないよう単純クリック時のみ動作
+                if(li.classList.contains('dragging')) return;
                 selectTrack(index);
-                player.playVideo(); // リストから直接選んだら再生
+                player.playVideo(); 
             });
+
+            // ドラッグ＆ドロップイベントの登録
+            li.addEventListener('dragstart', handleDragStart);
+            li.addEventListener('dragend', handleDragEnd);
+
             trackListEl.appendChild(li);
         });
+
+        // リスト全体へのドラッグオーバー・ドロップイベント
+        trackListEl.addEventListener('dragover', handleDragOver);
+        trackListEl.addEventListener('drop', handleDrop);
+
         updatePlayerUI();
     }
+
+    // --- ドラッグ＆ドロップ用ロジック ---
+    let dragSrcIndex = null;
+
+    function handleDragStart(e) {
+        dragSrcIndex = parseInt(this.getAttribute('data-index'));
+        this.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragEnd(e) {
+        this.classList.remove('dragging');
+        const items = trackListEl.querySelectorAll('.track-item');
+        items.forEach(item => item.classList.remove('dragging'));
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault(); // ドロップを許可するために必要
+        e.dataTransfer.dropEffect = 'move';
+        
+        const draggingItem = trackListEl.querySelector('.dragging');
+        if (!draggingItem) return;
+
+        // マウス位置に一番近い要素を取得して、その手前か後ろに挿入
+        const siblings = [...trackListEl.querySelectorAll('.track-item:not(.dragging)')];
+        let nextSibling = siblings.find(sibling => {
+            const box = sibling.getBoundingClientRect();
+            return e.clientY <= box.top + box.height / 2;
+        });
+        
+        trackListEl.insertBefore(draggingItem, nextSibling);
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        
+        // 視覚的な並び順から新しい配列のインデックスを再構築
+        const items = [...trackListEl.querySelectorAll('.track-item')];
+        const newSongs = [];
+        let newCurrentIndex = currentIndex;
+        
+        items.forEach((item, newIdx) => {
+            const oldIdx = parseInt(item.getAttribute('data-index'));
+            newSongs.push(songs[oldIdx]);
+            
+            // 現在再生中の曲の新しい位置を特定
+            if (oldIdx === currentIndex) {
+                newCurrentIndex = newIdx;
+            }
+        });
+        
+        // データの更新と保存
+        songs = newSongs;
+        currentIndex = newCurrentIndex;
+        localStorage.setItem('wm_songs', JSON.stringify(songs));
+        localStorage.setItem('wm_currentIndex', currentIndex);
+        
+        // DOMをクリーンに再構成（インデックスの再割り当て）
+        initPlaylist();
+    }
+    // ------------------------------------
 
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('youtube-player', {
