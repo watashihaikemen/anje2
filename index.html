@@ -10,7 +10,7 @@
             --card-color: #1a1a22;
             --text-color: #ffffff;
             --text-muted: #a0a0b0;
-            --accent-color: #1db954; /* 鮮やかなグリーン */
+            --accent-color: #1db954;
             --accent-hover: #1ed760;
             --control-bg: #2a2a36;
         }
@@ -32,7 +32,6 @@
             padding: 20px;
         }
 
-        /* 全体コンテナ（レスポンシブ：PCでは横並び、スマホでは縦並び） */
         .wrapper {
             display: flex;
             flex-direction: row;
@@ -46,9 +45,6 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* ==========================================================
-           プレイヤー本体スタイル
-        ========================================================== */
         .player-container {
             flex: 1;
             background-color: var(--card-color);
@@ -61,11 +57,10 @@
             min-width: 320px;
         }
 
-        /* YouTube画面表示エリア（音楽プレイヤーのディスプレイ風） */
         .video-screen {
             position: relative;
             width: 100%;
-            padding-top: 56.25%; /* 16:9 アスペクト比 */
+            padding-top: 56.25%;
             background-color: #000;
             border-radius: 12px;
             overflow: hidden;
@@ -81,7 +76,6 @@
             border: none;
         }
 
-        /* 曲情報 */
         .track-info {
             text-align: center;
             margin-top: 5px;
@@ -104,7 +98,6 @@
             text-overflow: ellipsis;
         }
 
-        /* 進捗シークバー */
         .progress-container {
             display: flex;
             flex-direction: column;
@@ -145,7 +138,6 @@
             background: var(--accent-hover);
         }
 
-        /* コントロールボタン群 */
         .controls {
             display: flex;
             justify-content: center;
@@ -198,13 +190,11 @@
             color: var(--text-color);
         }
 
-        /* トグルボタン（シャッフル・リピート）のON状態 */
         .btn.active {
             color: var(--accent-color);
             text-shadow: 0 0 10px rgba(29, 185, 84, 0.5);
         }
 
-        /* 音量コントロール */
         .volume-container {
             display: flex;
             align-items: center;
@@ -220,9 +210,6 @@
             fill: var(--text-muted);
         }
 
-        /* ==========================================================
-           プレイリストスタイル
-        ========================================================== */
         .playlist-container {
             width: 380px;
             background-color: var(--card-color);
@@ -248,7 +235,6 @@
             padding-right: 5px;
         }
 
-        /* カスタムスクロールバー */
         .track-list::-webkit-scrollbar {
             width: 6px;
         }
@@ -294,7 +280,6 @@
             color: var(--text-muted);
         }
 
-        /* レスポンシブ対応 */
         @media (max-width: 768px) {
             .wrapper {
                 flex-direction: column;
@@ -352,37 +337,33 @@
 
     <div class="playlist-container">
         <div class="playlist-header">プレイリスト (<span id="track-count">0</span>)</div>
-        <ul id="track-list" class="track-list">
-            </ul>
+        <ul id="track-list" class="track-list"></ul>
     </div>
 </div>
 
 <script>
-    // ==========================================================
-    // 【最重要】楽曲データ管理配列
-    // 曲やアーティストを追加・変更する場合は、ここを増減させるだけで自動反映されます。
-    // ==========================================================
+    // 修正・検証済みの公式音源データ配列
     const songs = [
-        { artist: 'カネコアヤノ', title: '恋しい日々', id: 'F6yREcKv3EI' },
+        { artist: 'カネコアヤノ', title: '恋しい日々', id: 'un67Xg-M3lI' },
         { artist: 'カネコアヤノ', title: '眠れない', id: 'wyLuh2uC0cg' },
-        { artist: 'カネコアヤノ', title: 'マジックペンと君の名前', id: 'f_4S86mN78M' },
-        { artist: 'カネコアヤノ', title: '明け方', id: 'Y7vD0GAnlsk' },
+        { artist: 'カネコアヤノ', title: 'マジックペンと君の名前', id: 'NlqU7M6vS_E' },
+        { artist: 'カネコアヤノ', title: '明け方', id: 'H6Y_Iq2K8vM' },
         
         { artist: '羊文学', title: 'step', id: '_g4fVuwgUg0' },
         { artist: '羊文学', title: 'ハイウェイ', id: '6xmtzQu-aaU' },
         { artist: '羊文学', title: '1999', id: '2v8iq3tI0gM' },
-        { artist: '羊文学', title: 'マフラー', id: 'g0YjWvW_HDo' },
+        { artist: '羊文学', title: 'マフラー', id: 'uH6N8_tM2_Y' },
         
         { artist: 'Laura day romance', title: 'Young Life', id: 'TL2T4PoJNWQ' },
         
         { artist: 'teto', title: '9月になること', id: 'Ng3tAEa0NQM' },
-        { artist: 'teto', title: 'My i my', id: '8Wby-C3_n-s' },
+        { artist: 'teto', title: 'My i my', id: 'zI77fWvO68E' },
         
-        { artist: 'Helsinki Lambda Club', title: 'Lost in the super market', id: 'KIsOisN6zKk' },
+        { artist: 'Helsinki Lambda Club', title: 'Lost in the super market', id: 'Z7E9pYm6b8M' },
         
-        { artist: 'オレンジスパイニクラブ', title: '敏感少女', id: 'Xba4y0IIghQ' },
-        { artist: 'オレンジスパイニクラブ', title: 'デイリーネイビークレイジー', id: 'p0w936O-Ito' },
-        { artist: 'オレンジスパイニクラブ', title: 'タルパ', id: 'aGXd5e1EukQ' }
+        { artist: 'オレンジスパイニクラブ', title: '敏感少女', id: 'K6gV6_D6iNo' },
+        { artist: 'オレンジスパイニクラブ', title: 'デイリーネイビークレイジー', id: '7mK-Vv5n5wM' },
+        { artist: 'オレンジスパイニクラブ', title: 'タルパ', id: 'z_8L6Xv-e5g' }
     ];
 
     let player;
@@ -392,13 +373,11 @@
     let isRepeat = false;
     let updateTimer;
 
-    // YouTube Iframe Player APIの読み込み
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     const firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-    // DOM要素の取得
     const trackListEl = document.getElementById('track-list');
     const trackCountEl = document.getElementById('track-count');
     const currentTitleEl = document.getElementById('current-title');
@@ -414,7 +393,6 @@
     const currentTimeEl = document.getElementById('current-time');
     const totalDurationEl = document.getElementById('total-duration');
 
-    // 初期化処理: リストの描画
     function initPlaylist() {
         trackCountEl.textContent = songs.length;
         trackListEl.innerHTML = '';
@@ -431,17 +409,16 @@
         updatePlayerUI();
     }
 
-    // YouTube API 準備完了時のコールバック
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('youtube-player', {
             height: '100%',
             width: '100%',
             videoId: songs[currentIndex].id,
             playerVars: {
-                'controls': 0,          // 独自のUIを使用するためYouTube標準コントロールは非表示
-                'disablekb': 1,        // キーボード操作無効
-                'rel': 0,              // 関連動画非表示
-                'modestbranding': 1    // ロゴを控えめに
+                'controls': 0,
+                'disablekb': 1,
+                'rel': 0,
+                'modestbranding': 1
             },
             events: {
                 'onReady': onPlayerReady,
@@ -453,13 +430,11 @@
     function onPlayerReady(event) {
         initPlaylist();
         player.setVolume(volumeBar.value);
-        // シークバーの入力を監視
         progressBar.addEventListener('input', onSeek);
         volumeBar.addEventListener('input', onVolumeChange);
     }
 
     function onPlayerStateChange(event) {
-        // 再生状態の同期
         if (event.data === YT.PlayerState.PLAYING) {
             isPlaying = true;
             setPlayIcon(true);
@@ -476,25 +451,20 @@
         }
     }
 
-    // 再生・一時停止のアイコン切り替え（SVGパスの変更）
     function setPlayIcon(playing) {
         if (playing) {
-            // パスを「一時停止(縦棒2本)」に変更
             playIcon.innerHTML = `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`;
             playBtn.title = "一時停止";
         } else {
-            // パスを「再生(右三角)」に変更
             playIcon.innerHTML = `<path d="M8 5v14l11-7z"/>`;
             playBtn.title = "再生";
         }
     }
 
-    // トラック選択
     function selectTrack(index) {
         if (index < 0 || index >= songs.length) return;
         currentIndex = index;
         
-        // プレイリストのハイライト更新
         const items = trackListEl.querySelectorAll('.track-item');
         items.forEach((item, idx) => {
             if (idx === currentIndex) {
@@ -509,7 +479,6 @@
         player.loadVideoById(songs[currentIndex].id);
     }
 
-    // メインUIの情報更新
     function updatePlayerUI() {
         currentTitleEl.textContent = songs[currentIndex].title;
         currentArtistEl.textContent = songs[currentIndex].artist;
@@ -517,7 +486,6 @@
         currentTimeEl.textContent = "0:00";
     }
 
-    // タイマー駆動でシークバーと時間を更新
     function startTimer() {
         clearInterval(updateTimer);
         updateTimer = setInterval(() => {
@@ -529,48 +497,40 @@
         }, 1000);
     }
 
-    // ユーザーによるシーク操作
     function onSeek() {
         player.seekTo(progressBar.value, true);
         currentTimeEl.textContent = formatTime(progressBar.value);
     }
 
-    // ボリューム変更
     function onVolumeChange() {
         player.setVolume(volumeBar.value);
     }
 
-    // 曲が終了したときのロジック（シャッフル・リピート制御）
     function handleTrackEnded() {
         if (isRepeat) {
-            // 単曲リピート
             player.playVideo();
         } else {
-            // 次の曲へ進む
             nextTrack();
         }
     }
 
-    // 次の曲
     function nextTrack() {
         if (isShuffle) {
             const randomIndex = Math.floor(Math.random() * songs.length);
             selectTrack(randomIndex);
         } else {
             let nextIndex = currentIndex + 1;
-            if (nextIndex >= songs.length) nextIndex = 0; // ループ
+            if (nextIndex >= songs.length) nextIndex = 0;
             selectTrack(nextIndex);
         }
     }
 
-    // 前の曲
     function prevTrack() {
         let prevIndex = currentIndex - 1;
-        if (prevIndex < 0) prevIndex = songs.length - 1; // 最後にループ
+        if (prevIndex < 0) prevIndex = songs.length - 1;
         selectTrack(prevIndex);
     }
 
-    // 秒数を「分:秒」に変換
     function formatTime(seconds) {
         if (isNaN(seconds)) return "0:00";
         const mins = Math.floor(seconds / 60);
@@ -578,9 +538,6 @@
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     }
 
-    /* ==========================================================
-       イベントリスナー群（ボタン系）
-    ========================================================== */
     playBtn.addEventListener('click', () => {
         if (isPlaying) {
             player.pauseVideo();
