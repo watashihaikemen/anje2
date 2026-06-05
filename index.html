@@ -29,7 +29,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 40px 20px; /* 上下の余白を確保してハミ出しを防止 */
         }
 
         .wrapper {
@@ -43,6 +43,7 @@
             border-radius: 24px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.05);
+            margin: auto; /* どんな画面サイズでも完全に中央に配置 */
         }
 
         .player-container {
@@ -195,6 +196,12 @@
             text-shadow: 0 0 10px rgba(29, 185, 84, 0.5);
         }
 
+        /* 1曲ループ時の特別カラー（識別用） */
+        .btn.active-once {
+            color: #00e676;
+            text-shadow: 0 0 10px rgba(0, 230, 118, 0.6);
+        }
+
         .volume-container {
             display: flex;
             align-items: center;
@@ -269,20 +276,10 @@
             color: var(--accent-color);
         }
 
-        .list-title {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .list-artist {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
         @media (max-width: 768px) {
             .wrapper {
                 flex-direction: column;
+                align-items: center;
             }
             .playlist-container {
                 width: 100%;
@@ -324,9 +321,8 @@
             <button id="next-btn" class="btn btn-medium" title="次の曲">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
             </button>
-            <button id="repeat-btn" class="btn btn-small" title="リピート">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-            </button>
+            <button id="repeat-btn" class="btn btn-small" title="リピート: オフ">
+                </button>
         </div>
 
         <div class="volume-container">
@@ -342,35 +338,36 @@
 </div>
 
 <script>
-    // 指定された正確なYouTube URLからIDを抽出・最適化した配列
     const songs = [
         { artist: 'カネコアヤノ', title: '恋しい日々', id: 'K1XlKpqqA24' },
         { artist: 'カネコアヤノ', title: '眠れない', id: 'wyLuh2uC0cg' },
         { artist: 'カネコアヤノ', title: 'マジックペンと君の名前', id: 'hACjZqwsTvo' },
         { artist: 'カネコアヤノ', title: '明け方', id: 'PtGONkpggjo' },
-        
         { artist: '羊文学', title: 'step', id: '_g4fVuwgUg0' },
         { artist: '羊文学', title: 'ハイウェイ', id: '6xmtzQu-aaU' },
         { artist: '羊文学', title: '1999', id: '2v8iq3tI0gM' },
         { artist: '羊文学', title: 'マフラー', id: 'qF-4iBz-2zI' },
-        
         { artist: 'Laura day romance', title: 'Young Life', id: 'TL2T4PoJNWQ' },
-        
         { artist: 'teto', title: '9月になること', id: 'Ng3tAEa0NQM' },
         { artist: 'teto', title: 'My i my', id: 'WuK9IgIt_Vg' },
-        
         { artist: 'Helsinki Lambda Club', title: 'Lost in the super market', id: 'sFikoHALzng' },
-        
         { artist: 'オレンジスパイニクラブ', title: '敏感少女', id: 'OWwex9TXz08' },
         { artist: 'オレンジスパイニクラブ', title: 'デイリーネイビークレイジー', id: 'tTNp5XLiFQs' },
         { artist: 'オレンジスパイニクラブ', title: 'タルパ', id: '1aIpRDODQrQ' }
     ];
 
+    // LocalStorageから前回の状態を読み込み（なければデフォルト値）
+    let currentIndex = parseInt(localStorage.getItem('wm_currentIndex')) || 0;
+    let isShuffle = localStorage.getItem('wm_isShuffle') === 'true';
+    // repeatMode: 0 = オフ(順次再生して終了), 1 = 全曲リピート, 2 = 1曲ループ
+    let repeatMode = parseInt(localStorage.getItem('wm_repeatMode')) || 0; 
+    let currentVolume = parseInt(localStorage.getItem('wm_volume')) || 50;
+
+    // インデックスの安全弁（曲リストが変更された場合などの対策）
+    if (currentIndex >= songs.length || currentIndex < 0) currentIndex = 0;
+
     let player;
-    let currentIndex = 0;
     let isPlaying = false;
-    let isShuffle = false;
-    let isRepeat = false;
     let updateTimer;
 
     const tag = document.createElement('script');
@@ -403,7 +400,10 @@
                 <div class="list-title">${song.title}</div>
                 <div class="list-artist">${song.artist}</div>
             `;
-            li.addEventListener('click', () => selectTrack(index));
+            li.addEventListener('click', () => {
+                selectTrack(index);
+                player.playVideo(); // リストから直接選んだら再生
+            });
             trackListEl.appendChild(li);
         });
         updatePlayerUI();
@@ -429,7 +429,13 @@
 
     function onPlayerReady(event) {
         initPlaylist();
-        player.setVolume(volumeBar.value);
+        
+        // 保存データのUI反映
+        volumeBar.value = currentVolume;
+        player.setVolume(currentVolume);
+        shuffleBtn.classList.toggle('active', isShuffle);
+        updateRepeatButtonUI();
+
         progressBar.addEventListener('input', onSeek);
         volumeBar.addEventListener('input', onVolumeChange);
     }
@@ -464,6 +470,9 @@
     function selectTrack(index) {
         if (index < 0 || index >= songs.length) return;
         currentIndex = index;
+        
+        // 状態保存
+        localStorage.setItem('wm_currentIndex', currentIndex);
         
         const items = trackListEl.querySelectorAll('.track-item');
         items.forEach((item, idx) => {
@@ -503,25 +512,51 @@
     }
 
     function onVolumeChange() {
-        player.setVolume(volumeBar.value);
+        currentVolume = volumeBar.value;
+        player.setVolume(currentVolume);
+        localStorage.setItem('wm_volume', currentVolume);
     }
 
+    // 曲が終了したときの判定
     function handleTrackEnded() {
-        if (isRepeat) {
+        if (repeatMode === 2) {
+            // 1曲ループ
             player.playVideo();
         } else {
-            nextTrack();
+            // 自動終了のフラグを立てて次へ
+            nextTrack(true);
         }
     }
 
-    function nextTrack() {
+    // 次の曲（isAutoEnd: 自動で曲が終わって遷移したかどうか）
+    function nextTrack(isAutoEnd = false) {
         if (isShuffle) {
-            const randomIndex = Math.floor(Math.random() * songs.length);
+            // シャッフル時は現在の曲以外からランダム選曲（1曲だけの場合はそのまま）
+            let randomIndex = currentIndex;
+            if (songs.length > 1) {
+                while (randomIndex === currentIndex) {
+                    randomIndex = Math.floor(Math.random() * songs.length);
+                }
+            }
             selectTrack(randomIndex);
+            player.playVideo();
         } else {
             let nextIndex = currentIndex + 1;
-            if (nextIndex >= songs.length) nextIndex = 0;
-            selectTrack(nextIndex);
+            if (nextIndex >= songs.length) {
+                if (repeatMode === 1 || !isAutoEnd) {
+                    // 全曲リピートON、または手動で「次へ」を押した場合は最初に戻る
+                    nextIndex = 0;
+                    selectTrack(nextIndex);
+                    player.playVideo();
+                } else {
+                    // リピートオフかつ全曲終了なら再生を停止
+                    isPlaying = false;
+                    setPlayIcon(false);
+                }
+            } else {
+                selectTrack(nextIndex);
+                player.playVideo();
+            }
         }
     }
 
@@ -529,9 +564,32 @@
         let prevIndex = currentIndex - 1;
         if (prevIndex < 0) prevIndex = songs.length - 1;
         selectTrack(prevIndex);
+        player.playVideo();
     }
 
-    function formatTime(seconds) {
+    // リピートボタンのUIと状態管理を更新
+    function updateRepeatButtonUI() {
+        if (repeatMode === 0) {
+            repeatBtn.className = "btn btn-small";
+            repeatBtn.title = "リピート: オフ";
+            repeatBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg>`;
+        } else if (repeatMode === 1) {
+            repeatBtn.className = "btn btn-small active";
+            repeatBtn.title = "リピート: 全曲";
+            repeatBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg>`;
+        } else if (repeatMode === 2) {
+            repeatBtn.className = "btn btn-small active-once";
+            repeatBtn.title = "リピート: 1曲";
+            // 1曲ループと分かるように、中央に「1」のバッジを入れたSVG
+            repeatBtn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/>
+                    <text x="9" y="15" font-size="8" font-family="Arial" font-weight="bold" fill="currentColor" stroke="none">1</text>
+                </svg>`;
+        }
+    }
+
+    formatTime = (seconds) => {
         if (isNaN(seconds)) return "0:00";
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
@@ -546,17 +604,20 @@
         }
     });
 
-    nextBtn.addEventListener('click', nextTrack);
+    nextBtn.addEventListener('click', () => nextTrack(false)); // 手動スキップ
     prevBtn.addEventListener('click', prevTrack);
 
     shuffleBtn.addEventListener('click', () => {
         isShuffle = !isShuffle;
         shuffleBtn.classList.toggle('active', isShuffle);
+        localStorage.setItem('wm_isShuffle', isShuffle);
     });
 
+    // リピートボタンクリック（オフ -> 全曲 -> 1曲 の3パターン切り替え）
     repeatBtn.addEventListener('click', () => {
-        isRepeat = !isRepeat;
-        repeatBtn.classList.toggle('active', isRepeat);
+        repeatMode = (repeatMode + 1) % 3;
+        localStorage.setItem('wm_repeatMode', repeatMode);
+        updateRepeatButtonUI();
     });
 </script>
 
