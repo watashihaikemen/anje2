@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Player Linker</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Premium Web Music Player</title>
     <style>
         :root {
-            --bg-color: #121212;
-            --player-bg: #1e1e1e;
-            --text-main: #ffffff;
-            --text-sub: #b3b3b3;
-            --accent-color: #ff0000; 
-            --list-hover: #2a2a2a;
+            --bg-color: #0f0f12;
+            --card-color: #1a1a22;
+            --text-color: #ffffff;
+            --text-muted: #a0a0b0;
+            --accent-color: #1db954; /* 鮮やかなグリーン */
+            --accent-hover: #1ed760;
+            --control-bg: #2a2a36;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
         }
 
         body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-main);
+            color: var(--text-color);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -32,297 +32,576 @@
             padding: 20px;
         }
 
-        .container {
+        /* 全体コンテナ（レスポンシブ：PCでは横並び、スマホでは縦並び） */
+        .wrapper {
             display: flex;
-            width: 900px;
-            max-width: 100%;
-            height: 600px;
-            background-color: var(--player-bg);
+            flex-direction: row;
+            gap: 30px;
+            width: 100%;
+            max-width: 960px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 25px;
+            border-radius: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* ==========================================================
+           プレイヤー本体スタイル
+        ========================================================== */
+        .player-container {
+            flex: 1;
+            background-color: var(--card-color);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            min-width: 320px;
+        }
+
+        /* YouTube画面表示エリア（音楽プレイヤーのディスプレイ風） */
+        .video-screen {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 アスペクト比 */
+            background-color: #000;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
         }
 
-        /* 左側：プレイリストエリア */
-        .sidebar {
-            width: 40%;
-            border-right: 1px solid #282828;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar-header {
-            padding: 20px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-bottom: 1px solid #282828;
-        }
-
-        .track-list {
-            list-style: none;
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-
-        .track-item {
-            padding: 14px 20px;
-            cursor: pointer;
-            border-bottom: 1px solid #232323;
-            transition: background 0.2s;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .track-item:hover {
-            background-color: var(--list-hover);
-        }
-
-        .track-item.active {
-            background-color: #282828;
-            border-left: 4px solid var(--accent-color);
-        }
-
-        .track-item .track-title {
-            font-size: 0.95rem;
-            font-weight: 500;
-            margin-bottom: 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .track-item .track-artist {
-            font-size: 0.8rem;
-            color: var(--text-sub);
-        }
-
-        /* 右側：メインプレイヤーエリア */
-        .main-player {
-            width: 60%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
-        }
-
-        /* アートワーク（YouTubeサムネイル） */
-        .album-art {
-            width: 260px;
-            height: 260px;
-            background-color: #333;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            background-size: cover;
-            background-position: center;
-        }
-
-        /* 現在の曲情報 */
-        .now-playing {
-            text-align: center;
-            margin-bottom: 30px;
+        .video-screen iframe, #youtube-player {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            border: none;
         }
 
-        .now-playing .current-title {
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin-bottom: 8px;
+        /* 曲情報 */
+        .track-info {
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .track-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 6px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .now-playing .current-artist {
-            font-size: 1rem;
-            color: var(--text-sub);
+        .track-artist {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        /* 音楽プレイヤー用コントロールボタン */
+        /* 進捗シークバー */
+        .progress-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--control-bg);
+            outline: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+            background: var(--accent-hover);
+        }
+
+        /* コントロールボタン群 */
         .controls {
             display: flex;
-            align-items: center;
             justify-content: center;
-            gap: 24px;
-            margin-bottom: 30px;
+            align-items: center;
+            gap: 18px;
         }
 
         .btn {
             background: none;
             border: none;
-            color: var(--text-sub);
-            font-size: 1.3rem;
+            color: var(--text-color);
             cursor: pointer;
-            transition: color 0.2s, transform 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+            border-radius: 50%;
         }
 
         .btn:hover {
-            color: var(--text-main);
+            color: var(--accent-color);
+            transform: scale(1.05);
         }
 
         .btn:active {
             transform: scale(0.95);
         }
 
-        /* YouTubeを開く専用の大きな再生ボタン */
-        .btn-youtube-play {
-            padding: 12px 30px;
+        .btn-small {
+            width: 36px;
+            height: 36px;
+            color: var(--text-muted);
+        }
+
+        .btn-medium {
+            width: 46px;
+            height: 46px;
+            background-color: var(--control-bg);
+        }
+
+        .btn-large {
+            width: 60px;
+            height: 60px;
+            background-color: var(--text-color);
+            color: var(--bg-color);
+        }
+
+        .btn-large:hover {
             background-color: var(--accent-color);
-            color: #ffffff;
-            border: none;
-            border-radius: 25px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        /* トグルボタン（シャッフル・リピート）のON状態 */
+        .btn.active {
+            color: var(--accent-color);
+            text-shadow: 0 0 10px rgba(29, 185, 84, 0.5);
+        }
+
+        /* 音量コントロール */
+        .volume-container {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
-            text-decoration: none;
-            transition: background 0.2s, transform 0.1s;
-            box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
+            width: 60%;
+            margin: 0 auto;
         }
 
-        .btn-youtube-play:hover {
-            background-color: #e60000;
-            transform: scale(1.03);
+        .volume-container svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--text-muted);
         }
 
-        /* レスポンシブ */
+        /* ==========================================================
+           プレイリストスタイル
+        ========================================================== */
+        .playlist-container {
+            width: 380px;
+            background-color: var(--card-color);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
+
+        .playlist-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--control-bg);
+            padding-bottom: 10px;
+        }
+
+        .track-list {
+            list-style: none;
+            overflow-y: auto;
+            max-height: 400px;
+            padding-right: 5px;
+        }
+
+        /* カスタムスクロールバー */
+        .track-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .track-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .track-list::-webkit-scrollbar-thumb {
+            background: var(--control-bg);
+            border-radius: 3px;
+        }
+
+        .track-item {
+            display: flex;
+            flex-direction: column;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 4px;
+        }
+
+        .track-item:hover {
+            background-color: var(--control-bg);
+        }
+
+        .track-item.playing {
+            background-color: rgba(29, 185, 84, 0.15);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .track-item.playing .list-title {
+            color: var(--accent-color);
+        }
+
+        .list-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .list-artist {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* レスポンシブ対応 */
         @media (max-width: 768px) {
-            .container {
-                flex-direction: column-reverse;
-                height: auto;
+            .wrapper {
+                flex-direction: column;
             }
-            .sidebar {
+            .playlist-container {
                 width: 100%;
-                height: 350px;
-            }
-            .main-player {
-                width: 100%;
-                padding: 30px 20px;
-            }
-            .album-art {
-                width: 200px;
-                height: 200px;
-                margin-bottom: 20px;
             }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="sidebar">
-        <div class="sidebar-header">プレイリスト</div>
-        <ul class="track-list" id="playlist"></ul>
-    </div>
+<div class="wrapper">
+    <div class="player-container">
+        <div class="video-screen">
+            <div id="youtube-player"></div>
+        </div>
 
-    <div class="main-player">
-        <div class="album-art" id="album-art"></div>
+        <div class="track-info">
+            <div id="current-title" class="track-title">曲を選択してください</div>
+            <div id="current-artist" class="track-artist">-</div>
+        </div>
 
-        <div class="now-playing">
-            <div class="current-title" id="current-title">曲を選択してください</div>
-            <div class="current-artist" id="current-artist">-</div>
+        <div class="progress-container">
+            <input type="range" id="progress-bar" class="slider" value="0" max="100" step="1">
+            <div class="time-info">
+                <span id="current-time">0:00</span>
+                <span id="total-duration">0:00</span>
+            </div>
         </div>
 
         <div class="controls">
-            <button class="btn" id="btn-prev" title="前の曲"><i class="fas fa-step-backward"></i> 前の曲</button>
-            <button class="btn" id="btn-next" title="次の曲"><i class="fas fa-step-forward"></i> 次の曲</button>
+            <button id="shuffle-btn" class="btn btn-small" title="シャッフル">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5M4 20l7-7M21 3L11 13M15 21h6v-5M4 4l17 17"/></svg>
+            </button>
+            <button id="prev-btn" class="btn btn-medium" title="前の曲">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 7l8.5 6V6z"/></svg>
+            </button>
+            <button id="play-btn" class="btn btn-large" title="再生">
+                <svg id="play-icon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <button id="next-btn" class="btn btn-medium" title="次の曲">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+            </button>
+            <button id="repeat-btn" class="btn btn-small" title="リピート">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            </button>
         </div>
 
-        <a href="#" target="_blank" class="btn-youtube-play" id="btn-youtube">
-            <i class="fab fa-youtube"></i> YouTubeで再生する
-        </a>
+        <div class="volume-container">
+            <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            <input type="range" id="volume-bar" class="slider" value="50" max="100">
+        </div>
+    </div>
+
+    <div class="playlist-container">
+        <div class="playlist-header">プレイリスト (<span id="track-count">0</span>)</div>
+        <ul id="track-list" class="track-list">
+            </ul>
     </div>
 </div>
 
 <script>
-    // 指定された全16曲のデータ
-    const tracks = [
-        { artist: "カネコアヤノ", title: "恋しい日々", id: "O0aA77rXw0M" },
-        { artist: "カネコアヤノ", title: "眠れない", id: "5o6L437vQjE" },
-        { artist: "カネコアヤノ", title: "マジックペンと君の名前", id: "fN-99e2X1zY" },
-        { artist: "カネコアヤノ", title: "明け方", id: "1vY-iXvUe9Q" },
-        { artist: "羊文学", title: "step", id: "8W_tX770Txs" },
-        { artist: "羊文学", title: "ハイウェイ", id: "S4bT6tLw2cM" },
-        { artist: "羊文学", title: "1999", id: "S6pE0NWhuU0" },
-        { artist: "羊文学", title: "マフラー", id: "6-Uq6q9f0zM" },
-        { artist: "Laura day romance", title: "Young Life", id: "o2Lg6E1rC0I" },
-        { artist: "teto", title: "9月になること", id: "nEorl9wM_xM" },
-        { artist: "teto", title: "My i my", id: "p0vDRE7C4m4" },
-        { artist: "Helsinki Lambda Club", title: "Lost in the super market", id: "SWeuVz1wO_k" },
-        { artist: "オレンジスパイニクラブ", title: "敏感少女", id: "FpCH_0_5KTo" },
-        { artist: "オレンジスパイニクラブ", title: "デイリーネイビークレイジー", id: "zW1S8w9M6_Q" },
-        { artist: "オレンジスパイニクラブ", title: "タルパ", id: "U-o_MbeE9-w" },
-        { artist: "オレンジスパイニクラブ", title: "デイリーネイビークレイジー (2)", id: "zW1S8w9M6_Q" }
+    // ==========================================================
+    // 【最重要】楽曲データ管理配列
+    // 曲やアーティストを追加・変更する場合は、ここを増減させるだけで自動反映されます。
+    // ==========================================================
+    const songs = [
+        { artist: 'カネコアヤノ', title: '恋しい日々', id: 'F6yREcKv3EI' },
+        { artist: 'カネコアヤノ', title: '眠れない', id: 'wyLuh2uC0cg' },
+        { artist: 'カネコアヤノ', title: 'マジックペンと君の名前', id: 'f_4S86mN78M' },
+        { artist: 'カネコアヤノ', title: '明け方', id: 'Y7vD0GAnlsk' },
+        
+        { artist: '羊文学', title: 'step', id: '_g4fVuwgUg0' },
+        { artist: '羊文学', title: 'ハイウェイ', id: '6xmtzQu-aaU' },
+        { artist: '羊文学', title: '1999', id: '2v8iq3tI0gM' },
+        { artist: '羊文学', title: 'マフラー', id: 'g0YjWvW_HDo' },
+        
+        { artist: 'Laura day romance', title: 'Young Life', id: 'TL2T4PoJNWQ' },
+        
+        { artist: 'teto', title: '9月になること', id: 'Ng3tAEa0NQM' },
+        { artist: 'teto', title: 'My i my', id: '8Wby-C3_n-s' },
+        
+        { artist: 'Helsinki Lambda Club', title: 'Lost in the super market', id: 'KIsOisN6zKk' },
+        
+        { artist: 'オレンジスパイニクラブ', title: '敏感少女', id: 'Xba4y0IIghQ' },
+        { artist: 'オレンジスパイニクラブ', title: 'デイリーネイビークレイジー', id: 'p0w936O-Ito' },
+        { artist: 'オレンジスパイニクラブ', title: 'タルパ', id: 'aGXd5e1EukQ' }
     ];
 
+    let player;
     let currentIndex = 0;
+    let isPlaying = false;
+    let isShuffle = false;
+    let isRepeat = false;
+    let updateTimer;
 
-    // 初期化
-    function initPlayer() {
-        renderPlaylist();
-        selectTrack(0);
-    }
+    // YouTube Iframe Player APIの読み込み
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-    // リスト描画
-    function renderPlaylist() {
-        const playlistEl = document.getElementById('playlist');
-        playlistEl.innerHTML = '';
-        tracks.forEach((track, index) => {
+    // DOM要素の取得
+    const trackListEl = document.getElementById('track-list');
+    const trackCountEl = document.getElementById('track-count');
+    const currentTitleEl = document.getElementById('current-title');
+    const currentArtistEl = document.getElementById('current-artist');
+    const playBtn = document.getElementById('play-btn');
+    const playIcon = document.getElementById('play-icon');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const shuffleBtn = document.getElementById('shuffle-btn');
+    const repeatBtn = document.getElementById('repeat-btn');
+    const progressBar = document.getElementById('progress-bar');
+    const volumeBar = document.getElementById('volume-bar');
+    const currentTimeEl = document.getElementById('current-time');
+    const totalDurationEl = document.getElementById('total-duration');
+
+    // 初期化処理: リストの描画
+    function initPlaylist() {
+        trackCountEl.textContent = songs.length;
+        trackListEl.innerHTML = '';
+        songs.forEach((song, index) => {
             const li = document.createElement('li');
-            li.className = `track-item ${index === currentIndex ? 'active' : ''}`;
+            li.className = `track-item ${index === currentIndex ? 'playing' : ''}`;
             li.innerHTML = `
-                <span class="track-title">${track.title}</span>
-                <span class="track-artist">${track.artist}</span>
+                <div class="list-title">${song.title}</div>
+                <div class="list-artist">${song.artist}</div>
             `;
-            li.onclick = () => selectTrack(index);
-            playlistEl.appendChild(li);
+            li.addEventListener('click', () => selectTrack(index));
+            trackListEl.appendChild(li);
         });
+        updatePlayerUI();
     }
 
-    // 曲の選択・変更処理
-    function selectTrack(index) {
-        currentIndex = index;
-        const track = tracks[currentIndex];
-
-        // 画面の情報を更新
-        document.getElementById('current-title').innerText = track.title;
-        document.getElementById('current-artist').innerText = track.artist;
-        document.getElementById('album-art').style.backgroundImage = `url('https://img.youtube.com/vi/${track.id}/hqdefault.jpg')`;
-
-        // YouTubeの直リンクURLを動的に生成してボタンに付与
-        document.getElementById('btn-youtube').href = `https://www.youtube.com/watch?v=${track.id}`;
-
-        // リストのアクティブ状態を変更
-        const items = document.querySelectorAll('.track-item');
-        items.forEach((item, idx) => {
-            if (idx === currentIndex) {
-                item.classList.add('active');
-                item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            } else {
-                item.classList.remove('active');
+    // YouTube API 準備完了時のコールバック
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('youtube-player', {
+            height: '100%',
+            width: '100%',
+            videoId: songs[currentIndex].id,
+            playerVars: {
+                'controls': 0,          // 独自のUIを使用するためYouTube標準コントロールは非表示
+                'disablekb': 1,        // キーボード操作無効
+                'rel': 0,              // 関連動画非表示
+                'modestbranding': 1    // ロゴを控えめに
+            },
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
             }
         });
     }
 
+    function onPlayerReady(event) {
+        initPlaylist();
+        player.setVolume(volumeBar.value);
+        // シークバーの入力を監視
+        progressBar.addEventListener('input', onSeek);
+        volumeBar.addEventListener('input', onVolumeChange);
+    }
+
+    function onPlayerStateChange(event) {
+        // 再生状態の同期
+        if (event.data === YT.PlayerState.PLAYING) {
+            isPlaying = true;
+            setPlayIcon(true);
+            startTimer();
+            progressBar.max = Math.floor(player.getDuration());
+            totalDurationEl.textContent = formatTime(player.getDuration());
+        } else if (event.data === YT.PlayerState.PAUSED) {
+            isPlaying = false;
+            setPlayIcon(false);
+            clearInterval(updateTimer);
+        } else if (event.data === YT.PlayerState.ENDED) {
+            clearInterval(updateTimer);
+            handleTrackEnded();
+        }
+    }
+
+    // 再生・一時停止のアイコン切り替え（SVGパスの変更）
+    function setPlayIcon(playing) {
+        if (playing) {
+            // パスを「一時停止(縦棒2本)」に変更
+            playIcon.innerHTML = `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`;
+            playBtn.title = "一時停止";
+        } else {
+            // パスを「再生(右三角)」に変更
+            playIcon.innerHTML = `<path d="M8 5v14l11-7z"/>`;
+            playBtn.title = "再生";
+        }
+    }
+
+    // トラック選択
+    function selectTrack(index) {
+        if (index < 0 || index >= songs.length) return;
+        currentIndex = index;
+        
+        // プレイリストのハイライト更新
+        const items = trackListEl.querySelectorAll('.track-item');
+        items.forEach((item, idx) => {
+            if (idx === currentIndex) {
+                item.classList.add('playing');
+                item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                item.classList.remove('playing');
+            }
+        });
+
+        updatePlayerUI();
+        player.loadVideoById(songs[currentIndex].id);
+    }
+
+    // メインUIの情報更新
+    function updatePlayerUI() {
+        currentTitleEl.textContent = songs[currentIndex].title;
+        currentArtistEl.textContent = songs[currentIndex].artist;
+        progressBar.value = 0;
+        currentTimeEl.textContent = "0:00";
+    }
+
+    // タイマー駆動でシークバーと時間を更新
+    function startTimer() {
+        clearInterval(updateTimer);
+        updateTimer = setInterval(() => {
+            if (player && typeof player.getCurrentTime === 'function') {
+                const current = Math.floor(player.getCurrentTime());
+                progressBar.value = current;
+                currentTimeEl.textContent = formatTime(current);
+            }
+        }, 1000);
+    }
+
+    // ユーザーによるシーク操作
+    function onSeek() {
+        player.seekTo(progressBar.value, true);
+        currentTimeEl.textContent = formatTime(progressBar.value);
+    }
+
+    // ボリューム変更
+    function onVolumeChange() {
+        player.setVolume(volumeBar.value);
+    }
+
+    // 曲が終了したときのロジック（シャッフル・リピート制御）
+    function handleTrackEnded() {
+        if (isRepeat) {
+            // 単曲リピート
+            player.playVideo();
+        } else {
+            // 次の曲へ進む
+            nextTrack();
+        }
+    }
+
+    // 次の曲
     function nextTrack() {
-        let nextIndex = (currentIndex + 1) % tracks.length;
-        selectTrack(nextIndex);
+        if (isShuffle) {
+            const randomIndex = Math.floor(Math.random() * songs.length);
+            selectTrack(randomIndex);
+        } else {
+            let nextIndex = currentIndex + 1;
+            if (nextIndex >= songs.length) nextIndex = 0; // ループ
+            selectTrack(nextIndex);
+        }
     }
 
+    // 前の曲
     function prevTrack() {
-        let nextIndex = (currentIndex - 1 + tracks.length) % tracks.length;
-        selectTrack(nextIndex);
+        let prevIndex = currentIndex - 1;
+        if (prevIndex < 0) prevIndex = songs.length - 1; // 最後にループ
+        selectTrack(prevIndex);
     }
 
-    // ボタンのイベント紐付け
-    document.getElementById('btn-next').addEventListener('click', nextTrack);
-    document.getElementById('btn-prev').addEventListener('click', prevTrack);
+    // 秒数を「分:秒」に変換
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return "0:00";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
 
-    // 起動
-    initPlayer();
+    /* ==========================================================
+       イベントリスナー群（ボタン系）
+    ========================================================== */
+    playBtn.addEventListener('click', () => {
+        if (isPlaying) {
+            player.pauseVideo();
+        } else {
+            player.playVideo();
+        }
+    });
+
+    nextBtn.addEventListener('click', nextTrack);
+    prevBtn.addEventListener('click', prevTrack);
+
+    shuffleBtn.addEventListener('click', () => {
+        isShuffle = !isShuffle;
+        shuffleBtn.classList.toggle('active', isShuffle);
+    });
+
+    repeatBtn.addEventListener('click', () => {
+        isRepeat = !isRepeat;
+        repeatBtn.classList.toggle('active', isRepeat);
+    });
 </script>
+
 </body>
 </html>
