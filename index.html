@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Music Player</title>
+    <title>Music Player Linker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -11,7 +11,7 @@
             --player-bg: #1e1e1e;
             --text-main: #ffffff;
             --text-sub: #b3b3b3;
-            --accent-color: #ff0000; /* YouTubeカラーの赤 */
+            --accent-color: #ff0000; 
             --list-hover: #2a2a2a;
         }
 
@@ -34,9 +34,9 @@
 
         .container {
             display: flex;
-            width: 1000px;
+            width: 900px;
             max-width: 100%;
-            height: 650px;
+            height: 600px;
             background-color: var(--player-bg);
             border-radius: 12px;
             overflow: hidden;
@@ -45,7 +45,7 @@
 
         /* 左側：プレイリストエリア */
         .sidebar {
-            width: 35%;
+            width: 40%;
             border-right: 1px solid #282828;
             display: flex;
             flex-direction: column;
@@ -98,42 +98,37 @@
 
         /* 右側：メインプレイヤーエリア */
         .main-player {
-            width: 65%;
+            width: 60%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 30px;
+            padding: 40px;
         }
 
-        /* 動画表示エリア */
-        .video-container {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background-color: #000;
+        /* アートワーク（YouTubeサムネイル） */
+        .album-art {
+            width: 260px;
+            height: 260px;
+            background-color: #333;
             border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-            margin-bottom: 25px;
-        }
-
-        .video-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            background-size: cover;
+            background-position: center;
         }
 
         /* 現在の曲情報 */
         .now-playing {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             width: 100%;
         }
 
         .now-playing .current-title {
             font-size: 1.4rem;
             font-weight: bold;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -144,20 +139,20 @@
             color: var(--text-sub);
         }
 
-        /* コントロールパネル群（外部ボタン操作用） */
+        /* 音楽プレイヤー用コントロールボタン */
         .controls {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 28px;
-            margin-bottom: 15px;
+            gap: 24px;
+            margin-bottom: 30px;
         }
 
         .btn {
             background: none;
             border: none;
             color: var(--text-sub);
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             cursor: pointer;
             transition: color 0.2s, transform 0.1s;
         }
@@ -170,6 +165,29 @@
             transform: scale(0.95);
         }
 
+        /* YouTubeを開く専用の大きな再生ボタン */
+        .btn-youtube-play {
+            padding: 12px 30px;
+            background-color: var(--accent-color);
+            color: #ffffff;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
+        }
+
+        .btn-youtube-play:hover {
+            background-color: #e60000;
+            transform: scale(1.03);
+        }
+
         /* レスポンシブ */
         @media (max-width: 768px) {
             .container {
@@ -178,11 +196,16 @@
             }
             .sidebar {
                 width: 100%;
-                height: 300px;
+                height: 350px;
             }
             .main-player {
                 width: 100%;
-                padding: 20px 15px;
+                padding: 30px 20px;
+            }
+            .album-art {
+                width: 200px;
+                height: 200px;
+                margin-bottom: 20px;
             }
         }
     </style>
@@ -196,9 +219,7 @@
     </div>
 
     <div class="main-player">
-        <div class="video-container">
-            <div id="player-view"></div>
-        </div>
+        <div class="album-art" id="album-art"></div>
 
         <div class="now-playing">
             <div class="current-title" id="current-title">曲を選択してください</div>
@@ -206,16 +227,18 @@
         </div>
 
         <div class="controls">
-            <button class="btn" id="btn-prev" title="前の曲"><i class="fas fa-step-backward"></i></button>
-            <button class="btn" id="btn-play" title="再生"><i class="fas fa-play"></i></button>
-            <button class="btn" id="btn-pause" title="一時停止"><i class="fas fa-pause"></i></button>
-            <button class="btn" id="btn-next" title="次の曲"><i class="fas fa-step-forward"></i></button>
+            <button class="btn" id="btn-prev" title="前の曲"><i class="fas fa-step-backward"></i> 前の曲</button>
+            <button class="btn" id="btn-next" title="次の曲"><i class="fas fa-step-forward"></i> 次の曲</button>
         </div>
+
+        <a href="#" target="_blank" class="btn-youtube-play" id="btn-youtube">
+            <i class="fab fa-youtube"></i> YouTubeで再生する
+        </a>
     </div>
 </div>
 
 <script>
-    // 指定された全16曲のYouTube公式配信音源ID
+    // 指定された全16曲のデータ
     const tracks = [
         { artist: "カネコアヤノ", title: "恋しい日々", id: "O0aA77rXw0M" },
         { artist: "カネコアヤノ", title: "眠れない", id: "5o6L437vQjE" },
@@ -235,38 +258,15 @@
         { artist: "オレンジスパイニクラブ", title: "デイリーネイビークレイジー (2)", id: "zW1S8w9M6_Q" }
     ];
 
-    let player;
     let currentIndex = 0;
 
-    // YouTube API スクリプトのインジェクト
-    const tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-    // APIの準備完了時
-    function onYouTubeIframeAPIReady() {
-        player = new YT.Player('player-view', {
-            videoId: tracks[currentIndex].id,
-            playerVars: {
-                'rel': 0,
-                'playsinline': 1,
-                'autoplay': 0,
-                'controls': 1 // 確実にシークバーやYouTubeUIでも触れるように設定
-            },
-            events: {
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange
-            }
-        });
-    }
-
-    function onPlayerReady(event) {
+    // 初期化
+    function initPlayer() {
         renderPlaylist();
-        updateTrackUI();
+        selectTrack(0);
     }
 
-    // リストの描画
+    // リスト描画
     function renderPlaylist() {
         const playlistEl = document.getElementById('playlist');
         playlistEl.innerHTML = '';
@@ -282,18 +282,20 @@
         });
     }
 
-    // 曲の切り替え
-    function loadTrack(index) {
+    // 曲の選択・変更処理
+    function selectTrack(index) {
         currentIndex = index;
-        updateTrackUI();
-        player.loadVideoById(tracks[currentIndex].id);
-    }
-
-    function updateTrackUI() {
         const track = tracks[currentIndex];
+
+        // 画面の情報を更新
         document.getElementById('current-title').innerText = track.title;
         document.getElementById('current-artist').innerText = track.artist;
+        document.getElementById('album-art').style.backgroundImage = `url('https://img.youtube.com/vi/${track.id}/hqdefault.jpg')`;
 
+        // YouTubeの直リンクURLを動的に生成してボタンに付与
+        document.getElementById('btn-youtube').href = `https://www.youtube.com/watch?v=${track.id}`;
+
+        // リストのアクティブ状態を変更
         const items = document.querySelectorAll('.track-item');
         items.forEach((item, idx) => {
             if (idx === currentIndex) {
@@ -305,33 +307,22 @@
         });
     }
 
-    function selectTrack(index) {
-        loadTrack(index);
-    }
-
-    // 曲終了時の自動次曲送り
-    function onPlayerStateChange(event) {
-        if (event.data == YT.PlayerState.ENDED) {
-            nextTrack();
-        }
-    }
-
     function nextTrack() {
         let nextIndex = (currentIndex + 1) % tracks.length;
-        loadTrack(nextIndex);
+        selectTrack(nextIndex);
     }
 
     function prevTrack() {
         let nextIndex = (currentIndex - 1 + tracks.length) % tracks.length;
-        loadTrack(nextIndex);
+        selectTrack(nextIndex);
     }
 
-    // ボタン類の制御
-    document.getElementById('btn-play').addEventListener('click', () => { if(player) player.playVideo(); });
-    document.getElementById('btn-pause').addEventListener('click', () => { if(player) player.pauseVideo(); });
+    // ボタンのイベント紐付け
     document.getElementById('btn-next').addEventListener('click', nextTrack);
     document.getElementById('btn-prev').addEventListener('click', prevTrack);
 
+    // 起動
+    initPlayer();
 </script>
 </body>
 </html>
