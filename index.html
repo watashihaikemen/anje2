@@ -325,6 +325,41 @@
             border: 1px dashed var(--accent-color);
         }
 
+        /* 初期化ボタンのスタイル */
+        .reset-btn {
+            background: none;
+            border: 1px solid var(--control-bg);
+            color: var(--text-muted);
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-top: 5px;
+            width: 100%;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .reset-btn:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        /* 確認待機状態のスタイル */
+        .reset-btn.confirming {
+            background-color: rgba(239, 68, 68, 0.2) !important;
+            border-color: #ef4444 !important;
+            color: #ef4444 !important;
+            font-weight: bold;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.98);
+        }
+
         @media (max-width: 768px) {
             .wrapper {
                 flex-direction: column;
@@ -383,6 +418,7 @@
     <div class="playlist-container">
         <div class="playlist-header">プレイリスト (<span id="track-count">0</span>)</div>
         <ul id="track-list" class="track-list"></ul>
+        <button id="reset-btn" class="reset-btn">状態を初期化する</button>
     </div>
 </div>
 
@@ -431,6 +467,7 @@
     const volumeBar = document.getElementById('volume-bar');
     const currentTimeEl = document.getElementById('current-time');
     const totalDurationEl = document.getElementById('total-duration');
+    const resetBtn = document.getElementById('reset-btn');
 
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
@@ -473,9 +510,11 @@
             li.addEventListener('dragstart', handleDragStart);
             li.addEventListener('dragend', handleDragEnd);
 
-            handleDiv.addEventListener('touchstart', (e) => handleTouchStart(e, li), { passive: false });
-            handleDiv.addEventListener('touchmove', handleTouchMove, { passive: false });
-            handleDiv.addEventListener('touchend', handleTouchEnd);
+            // スマホ対応：ハンドル部分のタッチで処理を開始。スクロールを防止。
+            handleDiv.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                handleTouchStart(e, li);
+            }, { passive: false });
 
             trackListEl.appendChild(li);
         });
@@ -496,7 +535,7 @@
         finalizeOrder();
     }
 
-    // 【軽量化】高頻度で発生するdragover時のレイアウト計算（リフロー）を抑制するためのフラグ
+    // 高頻度で発生するdragover時のレイアウト計算（リフロー）を抑制するためのフラグ
     let dragOverTick = false;
     function handleDragOver(e) {
         e.preventDefault();
@@ -519,16 +558,19 @@
 
     let activeTouchElement = null;
 
+    // スマホ対応：タッチ開始時に全体（window）に対して移動・終了イベントを貼ることで指のすり抜けを防止
     function handleTouchStart(e, targetLi) {
         activeTouchElement = targetLi;
         activeTouchElement.classList.add('dragging');
+        
+        window.addEventListener('touchmove', handleTouchMove, { passive: false });
+        window.addEventListener('touchend', handleTouchEnd);
     }
 
-    // 【軽量化】TouchMoveも同様にアニメーションフレームで間引く
     let touchMoveTick = false;
     function handleTouchMove(e) {
         if (!activeTouchElement) return;
-        e.preventDefault();
+        e.preventDefault(); // ドラッグ中の画面スクロールを強制停止
         if (touchMoveTick) return;
         touchMoveTick = true;
 
@@ -548,6 +590,8 @@
             activeTouchElement = null;
             finalizeOrder();
         }
+        window.removeEventListener('touchmove', handleTouchMove);
+        window.removeEventListener('touchend', handleTouchEnd);
     }
 
     function getDragAfterElement(container, y) {
@@ -563,7 +607,6 @@
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    // 【軽量化】重かった全リセット(initPlaylist)をやめ、DOMの並び順からデータを再構築する爆速処理に変更
     function finalizeOrder() {
         const items = [...trackListEl.querySelectorAll('.track-item')];
         const newSongs = [];
@@ -572,7 +615,6 @@
         items.forEach((item, newIdx) => {
             const oldIdx = parseInt(item.getAttribute('data-index'));
             newSongs.push(songs[oldIdx]);
-            // DOMのカスタムアトリビュートを新しいインデックスに上書き
             item.setAttribute('data-index', newIdx);
             if (item.classList.contains('playing')) {
                 newCurrentIndex = newIdx;
@@ -652,7 +694,12 @@
         items.forEach((item, idx) => {
             if (idx === currentIndex) {
                 item.classList.add('playing');
-                item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+                /* 【修正】CSSのレスポンシブ幅（768px）を基準に判定 */
+                /* パソコン（768pxより大きい）の時だけ自動スクロールを動かし、スマホでは何もしない */
+                if (window.innerWidth > 768) {
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
             } else {
                 item.classList.remove('playing');
             }
@@ -783,6 +830,61 @@
         localStorage.setItem('wm_repeatMode', repeatMode);
         updateRepeatButtonUI();
     });
+
+    /* スマホ対応：2回連続タップで動作する初期化処理（セキュリティ制限の完全回避） */
+    let isResetConfirming = false;
+    let resetTimer;
+
+    resetBtn.addEventListener('click', () => {
+        if (!isResetConfirming) {
+            // 1回目のタップ：ボタンを警告表示に変えて待機状態にする
+            isResetConfirming = true;
+            resetBtn.textContent = '本当に初期化しますか？（もう一度タップ）';
+            resetBtn.classList.add('confirming');
+
+            // 4秒間何もしなければ自動キャンセル
+            resetTimer = setTimeout(() => {
+                cancelResetState();
+            }, 4000);
+        } else {
+            // 2回目のタップ：純粋なクリックイベントの文脈を保ったまま実行
+            clearTimeout(resetTimer);
+            executePlaylistReset();
+        }
+    });
+
+    function cancelResetState() {
+        isResetConfirming = false;
+        resetBtn.textContent = '状態を初期化する';
+        resetBtn.classList.remove('confirming');
+    }
+
+    function executePlaylistReset() {
+        // ローカルストレージを削除
+        localStorage.removeItem('wm_songs');
+        localStorage.removeItem('wm_currentIndex');
+        localStorage.removeItem('wm_isShuffle');
+        localStorage.removeItem('wm_repeatMode');
+
+        // 各状態を初期値に戻す
+        songs = [...defaultSongs];
+        currentIndex = 0;
+        isShuffle = false;
+        repeatMode = 0;
+
+        // UIパーツを同期
+        shuffleBtn.classList.toggle('active', isShuffle);
+        updateRepeatButtonUI();
+        initPlaylist();
+
+        // プレイヤーに1曲目をセット（直接タップイベント内なのでスマホでもブロックされません）
+        if (player && typeof player.cueVideoById === 'function') {
+            player.cueVideoById(songs[currentIndex].id);
+        }
+
+        // ボタンの見た目を戻す
+        cancelResetState();
+    }
 </script>
 
 </body>
