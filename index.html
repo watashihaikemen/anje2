@@ -503,7 +503,6 @@
                 <div class="list-title">${song.title}</div>
                 <div class="list-artist">${song.artist}</div>
             `;
-            // 【修正部分】クリックされた瞬間に最新の data-index 属性値を読み取って再生する
             metaDiv.addEventListener('click', () => {
                 const currentIdx = parseInt(li.getAttribute('data-index'));
                 selectTrack(currentIdx);
@@ -661,6 +660,7 @@
 
     function onPlayerReady(event) {
         initPlaylist();
+        initMediaSession(); // Media Session の初期設定
         volumeBar.value = currentVolume;
         player.setVolume(currentVolume);
         shuffleBtn.classList.toggle('active', isShuffle);
@@ -677,13 +677,46 @@
             startTimer();
             progressBar.max = Math.floor(player.getDuration());
             totalDurationEl.textContent = formatTime(player.getDuration());
+            
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = "playing";
+            }
         } else if (event.data === YT.PlayerState.PAUSED) {
             isPlaying = false;
             setPlayIcon(false);
             clearInterval(updateTimer);
+            
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = "paused";
+            }
         } else if (event.data === YT.PlayerState.ENDED) {
             clearInterval(updateTimer);
             handleTrackEnded();
+        }
+    }
+
+    // ★ Media Session API の初期化と操作ハンドラーの登録
+    function initMediaSession() {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('play', () => { player.playVideo(); });
+            navigator.mediaSession.setActionHandler('pause', () => { player.pauseVideo(); });
+            navigator.mediaSession.setActionHandler('previoustrack', () => { prevTrack(); });
+            navigator.mediaSession.setActionHandler('nexttrack', () => { nextTrack(false); });
+            updateMediaSessionMetadata();
+        }
+    }
+
+    // ★ ロック画面用のメタデータを更新する関数
+    function updateMediaSessionMetadata() {
+        if ('mediaSession' in navigator) {
+            const currentSong = songs[currentIndex];
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: currentSong.title,
+                artist: currentSong.artist,
+                artwork: [
+                    { src: `https://img.youtube.com/vi/${currentSong.id}/hqdefault.jpg`, sizes: '480x360', type: 'image/jpeg' }
+                ]
+            });
         }
     }
 
@@ -716,6 +749,7 @@
 
         updatePlayerUI();
         player.loadVideoById(songs[currentIndex].id);
+        updateMediaSessionMetadata(); // 曲が変わるタイミングでメタデータを更新
     }
 
     function updatePlayerUI() {
