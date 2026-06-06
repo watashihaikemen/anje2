@@ -417,7 +417,6 @@
 </div>
 
 <script>
-    // 指定された7曲を Yellow Moon の下に追加、および「明け方」を削除
     const defaultSongs = [
         { artist: 'FLOW', title: 'Sign', id: '1ZzkfZ1muU8' },
         { artist: '山猿', title: '風', id: 'HSy8gTntRhg' },
@@ -439,7 +438,7 @@
         { artist: '羊文学', title: 'マフラー', id: 'qF-4iBz-2zI' },
         { artist: 'Laura day romance', title: 'Young Life', id: 'TL2T4PoJNWQ' },
         { artist: 'teto', title: '9月になること', id: 'Ng3tAEa0NQM' },
-        { artist: 'teto', title: 'My i my', id: 'WuK9IgIt_Vg' },
+        { artist: 'teto', title: 'My I My', id: 'WuK9IgIt_Vg' },
         { artist: 'Helsinki Lambda Club', title: 'Lost in the super market', id: 'sFikoHALzng' },
         { artist: 'オレンジスパイニクラブ', title: '敏感少女', id: 'OWwex9TXz08' },
         { artist: 'オレンジスパイニクラブ', title: 'デイリーネイビークレイジー', id: 'tTNp5XLiFQs' },
@@ -452,7 +451,6 @@
     let repeatMode = parseInt(localStorage.getItem('wm_repeatMode')) || 0; 
     let currentVolume = parseInt(localStorage.getItem('wm_volume')) || 50;
 
-    // 【最適化】新しい楽曲の追加・古い楽曲の削除を自動検知し、古いストレージキャッシュを強制的に更新するロジック
     const hasNewSong = songs.some(s => s.id === 'ME0-xB3E2NE');
     const hasOldSong = songs.some(s => s.id === 'PtGONkpggjo');
     if (!hasNewSong || hasOldSong) {
@@ -505,8 +503,10 @@
                 <div class="list-title">${song.title}</div>
                 <div class="list-artist">${song.artist}</div>
             `;
+            // 【修正部分】クリックされた瞬間に最新の data-index 属性値を読み取って再生する
             metaDiv.addEventListener('click', () => {
-                selectTrack(index);
+                const currentIdx = parseInt(li.getAttribute('data-index'));
+                selectTrack(currentIdx);
                 player.playVideo();
             });
 
@@ -810,7 +810,6 @@
         }
     }
 
-    // 【最適化】String.prototype.padStart を使用した、高速かつ記述のシンプルなゼロパディング処理
     const formatTime = (seconds) => {
         if (isNaN(seconds)) return "0:00";
         const mins = Math.floor(seconds / 60);
