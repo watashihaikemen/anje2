@@ -38,7 +38,6 @@
             gap: 30px;
             width: 100%;
             max-width: 960px;
-            /* 【軽量化】重い backdrop-filter を廃止し、不透明度を調整した背景色に変更 */
             background: rgba(255, 255, 255, 0.04);
             padding: 25px;
             border-radius: 24px;
@@ -56,7 +55,6 @@
             gap: 20px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
             min-width: 320px;
-            /* 【軽量化】レンダリングの最適化指示 */
             contain: content;
         }
 
@@ -227,7 +225,6 @@
             flex-direction: column;
             gap: 15px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-            /* 【軽量化】レンダリングの最適化指示 */
             contain: content;
         }
 
@@ -267,7 +264,6 @@
             margin-bottom: 4px;
             user-select: none;
             -webkit-user-select: none;
-            /* 【軽量化】GPU駆動を促し、ドラッグ時のカクつきを抑える */
             will-change: transform;
         }
 
@@ -325,7 +321,6 @@
             border: 1px dashed var(--accent-color);
         }
 
-        /* 初期化ボタンのスタイル */
         .reset-btn {
             background: none;
             border: 1px solid var(--control-bg);
@@ -348,7 +343,6 @@
             color: #ef4444;
         }
 
-        /* 確認待機状態のスタイル */
         .reset-btn.confirming {
             background-color: rgba(239, 68, 68, 0.2) !important;
             border-color: #ef4444 !important;
@@ -423,11 +417,22 @@
 </div>
 
 <script>
-    let defaultSongs = [
+    // 指定された7曲を Yellow Moon の下に追加、および「明け方」を削除
+    const defaultSongs = [
+        { artist: 'FLOW', title: 'Sign', id: '1ZzkfZ1muU8' },
+        { artist: '山猿', title: '風', id: 'HSy8gTntRhg' },
+        { artist: '犬飼 feat. GUMI', title: '偶像崇拝', id: '9uJF7vWI1cM' },
+        { artist: 'Akeboshi', title: 'Yellow Moon', id: 'QkzBzmsvD_M' },
+        { artist: '熊木杏里', title: '君の文字', id: 'ME0-xB3E2NE' },
+        { artist: 'ZHIEND', title: 'Fallin\'（Japanese）', id: '1lVjI6H6sLU' },
+        { artist: 'ZHIEND', title: 'Adore（Japanese）', id: 'ODyn78tAxnQ' },
+        { artist: 'ZHIEND', title: 'Live for you（Japanese）', id: 'zcATi_CvnGo' },
+        { artist: 'ZHIEND', title: 'Heavy Rain（Japanese）', id: 'Qg6JZhw1HHs' },
+        { artist: '多田葵', title: '灼け落ちない翼', id: '1MsuXjTlCGE' },
+        { artist: '西森柚咲（内田真礼）', title: '灼け落ちない翼（How-Low-Hello Ver.）', id: '08yDMb4d_-8' },
         { artist: 'カネコアヤノ', title: '恋しい日々', id: 'K1XlKpqqA24' },
         { artist: 'カネコアヤノ', title: '眠れない', id: 'wyLuh2uC0cg' },
         { artist: 'カネコアヤノ', title: 'マジックペンと君の名前', id: 'hACjZqwsTvo' },
-        { artist: 'カネコアヤノ', title: '明け方', id: 'PtGONkpggjo' },
         { artist: '羊文学', title: 'step', id: '_g4fVuwgUg0' },
         { artist: '羊文学', title: 'ハイウェイ', id: '6xmtzQu-aaU' },
         { artist: '羊文学', title: '1999', id: '2v8iq3tI0gM' },
@@ -446,6 +451,16 @@
     let isShuffle = localStorage.getItem('wm_isShuffle') === 'true';
     let repeatMode = parseInt(localStorage.getItem('wm_repeatMode')) || 0; 
     let currentVolume = parseInt(localStorage.getItem('wm_volume')) || 50;
+
+    // 【最適化】新しい楽曲の追加・古い楽曲の削除を自動検知し、古いストレージキャッシュを強制的に更新するロジック
+    const hasNewSong = songs.some(s => s.id === 'ME0-xB3E2NE');
+    const hasOldSong = songs.some(s => s.id === 'PtGONkpggjo');
+    if (!hasNewSong || hasOldSong) {
+        songs = [...defaultSongs];
+        currentIndex = 0;
+        localStorage.setItem('wm_songs', JSON.stringify(songs));
+        localStorage.setItem('wm_currentIndex', currentIndex);
+    }
 
     if (currentIndex >= songs.length || currentIndex < 0) currentIndex = 0;
 
@@ -510,7 +525,6 @@
             li.addEventListener('dragstart', handleDragStart);
             li.addEventListener('dragend', handleDragEnd);
 
-            // スマホ対応：ハンドル部分のタッチで処理を開始。スクロールを防止。
             handleDiv.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 handleTouchStart(e, li);
@@ -535,7 +549,6 @@
         finalizeOrder();
     }
 
-    // 高頻度で発生するdragover時のレイアウト計算（リフロー）を抑制するためのフラグ
     let dragOverTick = false;
     function handleDragOver(e) {
         e.preventDefault();
@@ -558,7 +571,6 @@
 
     let activeTouchElement = null;
 
-    // スマホ対応：タッチ開始時に全体（window）に対して移動・終了イベントを貼ることで指のすり抜けを防止
     function handleTouchStart(e, targetLi) {
         activeTouchElement = targetLi;
         activeTouchElement.classList.add('dragging');
@@ -570,7 +582,7 @@
     let touchMoveTick = false;
     function handleTouchMove(e) {
         if (!activeTouchElement) return;
-        e.preventDefault(); // ドラッグ中の画面スクロールを強制停止
+        e.preventDefault(); 
         if (touchMoveTick) return;
         touchMoveTick = true;
 
@@ -694,9 +706,6 @@
         items.forEach((item, idx) => {
             if (idx === currentIndex) {
                 item.classList.add('playing');
-                
-                /* 【修正】CSSのレスポンシブ幅（768px）を基準に判定 */
-                /* パソコン（768pxより大きい）の時だけ自動スクロールを動かし、スマホでは何もしない */
                 if (window.innerWidth > 768) {
                     item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
@@ -801,11 +810,12 @@
         }
     }
 
-    formatTime = (seconds) => {
+    // 【最適化】String.prototype.padStart を使用した、高速かつ記述のシンプルなゼロパディング処理
+    const formatTime = (seconds) => {
         if (isNaN(seconds)) return "0:00";
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        return `${mins}:${String(secs).padStart(2, '0')}`;
     }
 
     playBtn.addEventListener('click', () => {
@@ -831,23 +841,19 @@
         updateRepeatButtonUI();
     });
 
-    /* スマホ対応：2回連続タップで動作する初期化処理（セキュリティ制限の完全回避） */
     let isResetConfirming = false;
     let resetTimer;
 
     resetBtn.addEventListener('click', () => {
         if (!isResetConfirming) {
-            // 1回目のタップ：ボタンを警告表示に変えて待機状態にする
             isResetConfirming = true;
             resetBtn.textContent = '本当に初期化しますか？（もう一度タップ）';
             resetBtn.classList.add('confirming');
 
-            // 4秒間何もしなければ自動キャンセル
             resetTimer = setTimeout(() => {
                 cancelResetState();
             }, 4000);
         } else {
-            // 2回目のタップ：純粋なクリックイベントの文脈を保ったまま実行
             clearTimeout(resetTimer);
             executePlaylistReset();
         }
@@ -860,29 +866,24 @@
     }
 
     function executePlaylistReset() {
-        // ローカルストレージを削除
         localStorage.removeItem('wm_songs');
         localStorage.removeItem('wm_currentIndex');
         localStorage.removeItem('wm_isShuffle');
         localStorage.removeItem('wm_repeatMode');
 
-        // 各状態を初期値に戻す
         songs = [...defaultSongs];
         currentIndex = 0;
         isShuffle = false;
         repeatMode = 0;
 
-        // UIパーツを同期
         shuffleBtn.classList.toggle('active', isShuffle);
         updateRepeatButtonUI();
         initPlaylist();
 
-        // プレイヤーに1曲目をセット（直接タップイベント内なのでスマホでもブロックされません）
         if (player && typeof player.cueVideoById === 'function') {
             player.cueVideoById(songs[currentIndex].id);
         }
 
-        // ボタンの見た目を戻す
         cancelResetState();
     }
 </script>
